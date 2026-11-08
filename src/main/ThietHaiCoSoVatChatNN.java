@@ -1,7 +1,7 @@
 package main;
 
-public abstract class ThietHaiCoSoVatChat_NN extends ThietHaiVatChat {
-    protected ThietHaiCoSoVatChat_NN(String maCSVC, String loaiCSVC) { 
+public abstract class ThietHaiCoSoVatChatNN extends ThietHaiVatChat {
+    protected ThietHaiCoSoVatChatNN(String maCSVC, String loaiCSVC) { 
     	super(maCSVC, loaiCSVC); 
     	}
 

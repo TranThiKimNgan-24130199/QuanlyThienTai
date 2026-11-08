@@ -1,6 +1,6 @@
 package main;
 
-public class ThietHaiCauDuong extends ThietHaiCoSoVatChat_NN {
+public class ThietHaiCauDuong extends ThietHaiCoSoVatChatNN {
     private int soCauBiHuHong;
     private int soCauBiSap;
     private double chieuDaiDuongBiHuHong;

@@ -1,37 +1,25 @@
 package main;
 
 public abstract class ThietHaiVatChat {
-    private String maCSVC;
-    private String loaiCSVC;
-    private double tongGiaTriThietHai;  
+    protected long tongGiaTriThietHai;
 
-    protected ThietHaiVatChat(String maCSVC, String loaiCSVC) {
-        this.maCSVC = maCSVC;
-        this.loaiCSVC = loaiCSVC;
+    //Trả về tổng giá trị thiệt hại hiện lưu của đối tượng này
+    public long tinhTongThietHai() { 
+    	return tongGiaTriThietHai; 
     }
 
-    public double tinhTongThietHai() { 
-    	return tongGiaTriThietHai; 
-    	}
+    //Gán giá trị thiệt hại mới; ném IllegalArgumentException nếu số tiền âm
+    public void capNhatGiaTriThietHai(long soTien) {
+        if (soTien < 0) throw new IllegalArgumentException("Giá trị thiệt hại không được âm");
+        this.tongGiaTriThietHai = soTien;
+    }
 
-    public void capNhatGiaTriThietHai(double soTien) { 
-    	this.tongGiaTriThietHai = soTien; 
-    	}
-
+    //Kiểm tra dữ liệu hợp lệ: giá trị thiệt hại không âm. Lớp con mở rộng thêm điều kiện riêng
     public boolean kiemTraHopLe() { 
     	return tongGiaTriThietHai >= 0; 
-    	}
+    }
 
-	public String getMaCSVC() {
-		return maCSVC;
-	}
-
-	public String getLoaiCSVC() {
-		return loaiCSVC;
-	}
-
-	public double getTongGiaTriThietHai() {
-		return tongGiaTriThietHai;
-	}
-
+    //Mỗi loại thiệt hại tự đẩy giá trị của mình vào đúng mục của bản thống kê
+    public abstract void capNhatThongTinThongKe(ThongKeThietHai tk);
 }
+

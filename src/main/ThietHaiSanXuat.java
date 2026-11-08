@@ -1,38 +1,38 @@
 package main;
 
-public class ThietHaiSanXuat extends ThietHaiVatChat {
+public class ThietHaiSanXuat extends ThietHaiTaiSanDan {
     private double dienTichCayTrongBiThietHai;
     private int soVatNuoiBiThietHai;
 
-    public ThietHaiSanXuat(String maCSVC) { 
-    	super(maCSVC, "SAN_XUAT"); 
-    	}
-
-    public void capNhatSanXuat(double dienTichCayTrongBiThietHai, int soVatNuoiBiThietHai,
-                               double tongGiaTriThietHai) {
-        this.dienTichCayTrongBiThietHai = dienTichCayTrongBiThietHai;
-        this.soVatNuoiBiThietHai = soVatNuoiBiThietHai;
-        capNhatGiaTriThietHai(tongGiaTriThietHai);
+    /*
+     * Cập nhật diện tích cây trồng bị thiệt hại, số vật nuôi bị thiệt hại và tổng giá trị thiệt hại
+     * Ném IllegalArgumentException nếu diện tích hoặc số vật nuôi âm
+     */
+    public void capNhatSanXuat(double dienTich, int soVatNuoi, long tongGiaTri) {
+        if (dienTich < 0 || soVatNuoi < 0)
+            throw new IllegalArgumentException("Diện tích / số vật nuôi không được âm");
+        this.dienTichCayTrongBiThietHai = dienTich;
+        this.soVatNuoiBiThietHai = soVatNuoi;
+        capNhatGiaTriThietHai(tongGiaTri);
     }
 
-    @Override 
-    public double tinhTongThietHai() { 
-    	return getTongGiaTriThietHai(); 
-    	}
-
+    //Hợp lệ khi điều kiện của lớp cha đúng và diện tích / số vật nuôi không âm
     @Override 
     public boolean kiemTraHopLe() {
-    	return false;
+        return super.kiemTraHopLe() && dienTichCayTrongBiThietHai >= 0 && soVatNuoiBiThietHai >= 0;
     }
 
-	public double getDienTichCayTrongBiThietHai() {
-		return dienTichCayTrongBiThietHai;
-	}
+    //Cộng giá trị thiệt hại sản xuất vào mục "sản xuất" của bản thống kê
+    @Override 
+    public void capNhatThongTinThongKe(ThongKeThietHai tk) {
+        tk.themGiaTriSanXuat(tongGiaTriThietHai);
+    }
 
-	public int getSoVatNuoiBiThietHai() {
-		return soVatNuoiBiThietHai;
-	}
-
-   
+    public double getDienTichCayTrongBiThietHai() { 
+    	return dienTichCayTrongBiThietHai; 
+    	}
+    public int getSoVatNuoiBiThietHai() { 
+    	return soVatNuoiBiThietHai; 
+    }
 }
 
