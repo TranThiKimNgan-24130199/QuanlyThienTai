@@ -46,7 +46,7 @@ public class BaoCao {
     public boolean kiemTraHopLe() {
     	return false;
     }
-
+// getter
 	public String getMaBaoCao() {
 		return maBaoCao;
 	}
