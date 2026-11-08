@@ -1,67 +1,173 @@
+
 package main;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import trangthai.CapDanhGia;
 import trangthai.MucDoThietHai;
 import trangthai.TrangThaiNguoi;
 
-//Bản ghi thiệt hại của một hộ dân trong một thiên tai (gồm thiệt hại tài sản; thiệt hại người lấy từ trạng thái thành viên hộ)
+// Ban ghi thiet hai cua mot ho dan trong mot thien tai
+// (gom thiet hai tai san va trang thai thiet hai cua tung thanh vien ho)
 public class BanGhiThietHaiHoDan {
+
     private String maBanGhi;
     private LocalDateTime thoiGianGhiNhan;
-    private HoDan hoDan;                                              // association 1
-    private ArrayList<ThietHaiTaiSanDan> dsThietHaiTaiSan = new ArrayList<>(); // composition 0..*
+    private HoDan hoDan;
 
-    //Tạo bản ghi cho một hộ dân với mã và thời điểm ghi nhận; danh sách thiệt hại tài sản ban đầu rỗng
+    // Luu trang thai thiet hai cua tung thanh vien theo CCCD
+    private HashMap<String, TrangThaiNguoi> dsTrangThaiNguoi = new HashMap<>();
+
+    // Danh sach thiet hai tai san cua ho dan
+    private ArrayList<ThietHaiTaiSanDan> dsThietHaiTaiSan = new ArrayList<>();
+
+    // Tao ban ghi cho mot ho dan voi ma va thoi diem ghi nhan
     public BanGhiThietHaiHoDan(String maBanGhi, LocalDateTime thoiGianGhiNhan, HoDan hoDan) {
+
+        if (maBanGhi == null || maBanGhi.trim().isEmpty()
+                || thoiGianGhiNhan == null || hoDan == null) {
+            throw new IllegalArgumentException("Thong tin ban ghi khong hop le");
+        }
+
         this.maBanGhi = maBanGhi;
         this.thoiGianGhiNhan = thoiGianGhiNhan;
         this.hoDan = hoDan;
+
+        // Mac dinh moi thanh vien trong ho co trang thai binh thuong
+        for (NguoiDan nd : hoDan.getDsThanhVien()) {
+            dsTrangThaiNguoi.put(nd.getCCCD(), TrangThaiNguoi.BINH_THUONG);
+        }
     }
 
-    //Đổi thời điểm ghi nhận của bản ghi
-    public void capNhatThoiGianGhiNhan(LocalDateTime thoiGian) { 
-    	this.thoiGianGhiNhan = thoiGian; 
+    // Doi thoi diem ghi nhan cua ban ghi
+    public void capNhatThoiGianGhiNhan(LocalDateTime thoiGian) {
+
+        if (thoiGian == null) {
+            throw new IllegalArgumentException("Thoi gian ghi nhan khong hop le");
+        }
+
+        this.thoiGianGhiNhan = thoiGian;
     }
 
-    /*
-     * Thêm một thiệt hại tài sản vào bản ghi. Trả về false nếu thiệt hại null, không hợp lệ,
-     * hoặc bản ghi đã có thiệt hại cùng loại (mỗi loại nhà cửa / sản xuất chỉ có tối đa một mục).
-     */
-    public boolean capNhatThietHaiTaiSan(ThietHaiTaiSanDan thietHai) {
-        if (thietHai == null || !thietHai.kiemTraHopLe()) return false;
-        for (ThietHaiTaiSanDan t : dsThietHaiTaiSan)
-            if (t.getClass() == thietHai.getClass()) return false;
-        return dsThietHaiTaiSan.add(thietHai);
-    }
+    // Cap nhat trang thai thiet hai cua mot thanh vien trong ho
+    public boolean capNhatTrangThaiNguoi(String cccd, TrangThaiNguoi trangThai) {
 
-    //Kiểm tra bản ghi hợp lệ: có mã, thời gian, hộ dân và mọi thiệt hại tài sản bên trong đều hợp lệ
-    public boolean kiemTraHopLe() {
-        if (maBanGhi == null || thoiGianGhiNhan == null || hoDan == null) return false;
-        for (ThietHaiTaiSanDan t : dsThietHaiTaiSan) if (!t.kiemTraHopLe()) return false;
+        if (cccd == null || cccd.trim().isEmpty() || trangThai == null) {
+            return false;
+        }
+
+        // Chi cap nhat trang thai cho nguoi thuoc ho dan nay
+        if (hoDan.timThanhVien(cccd) == null) {
+            return false;
+        }
+
+        dsTrangThaiNguoi.put(cccd, trangThai);
         return true;
     }
 
     /*
-     * Tính thống kê riêng của hộ: đếm số thành viên chết / mất tích / bị thương theo trạng thái
-     * trong HoDan, rồi cộng giá trị từng thiệt hại tài sản vào thống kê.
+     * Them mot thiet hai tai san vao ban ghi. Tra ve false neu thiet hai null, khong hop le,
+     * hoac ban ghi da co thiet hai cung loai (moi loai nha cua / san xuat chi co toi da mot muc).
+     */
+    public boolean capNhatThietHaiTaiSan(ThietHaiTaiSanDan thietHai) {
+
+        if (thietHai == null || !thietHai.kiemTraHopLe()) {
+            return false;
+        }
+
+        for (ThietHaiTaiSanDan t : dsThietHaiTaiSan) {
+            if (t.getClass() == thietHai.getClass()) {
+                return false;
+            }
+        }
+
+        return dsThietHaiTaiSan.add(thietHai);
+    }
+
+    // Kiem tra ban ghi hop le: co ma, thoi gian, ho dan va cac du lieu ben trong hop le
+    public boolean kiemTraHopLe() {
+
+        if (maBanGhi == null || maBanGhi.trim().isEmpty()
+                || thoiGianGhiNhan == null || hoDan == null) {
+            return false;
+        }
+
+        for (String cccd : dsTrangThaiNguoi.keySet()) {
+            if (cccd == null || cccd.trim().isEmpty()
+                    || dsTrangThaiNguoi.get(cccd) == null) {
+                return false;
+            }
+        }
+
+        for (ThietHaiTaiSanDan t : dsThietHaiTaiSan) {
+            if (t == null || !t.kiemTraHopLe()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /*
+     * Tinh thong ke rieng cua ho:
+     * Dem so thanh vien chet / mat tich / bi thuong theo trang thai trong ban ghi,
+     * roi cong gia tri tung thiet hai tai san vao thong ke.
      */
     public ThongKeThietHai tinhThongKe() {
+
         ThongKeThietHai tk = new ThongKeThietHai();
-        tk.capNhatSoNguoi(hoDan.demNguoiTheoTrangThai(TrangThaiNguoi.TU_VONG),
-                          hoDan.demNguoiTheoTrangThai(TrangThaiNguoi.MAT_TICH),
-                          hoDan.demNguoiTheoTrangThai(TrangThaiNguoi.BI_THUONG));
-        for (ThietHaiTaiSanDan t : dsThietHaiTaiSan) t.capNhatThongTinThongKe(tk);
+
+        int soNguoiChet = 0;
+        int soNguoiMatTich = 0;
+        int soNguoiBiThuong = 0;
+
+        for (TrangThaiNguoi trangThai : dsTrangThaiNguoi.values()) {
+
+            if (trangThai == TrangThaiNguoi.TU_VONG) {
+                soNguoiChet++;
+            } else if (trangThai == TrangThaiNguoi.MAT_TICH) {
+                soNguoiMatTich++;
+            } else if (trangThai == TrangThaiNguoi.BI_THUONG) {
+                soNguoiBiThuong++;
+            }
+        }
+
+        tk.capNhatSoNguoi(soNguoiChet, soNguoiMatTich, soNguoiBiThuong);
+
+        for (ThietHaiTaiSanDan t : dsThietHaiTaiSan) {
+            t.capNhatThongTinThongKe(tk);
+        }
+
         return tk;
     }
 
-    //Đánh giá mức độ thiệt hại của hộ: lấy thống kê của hộ rồi chấm theo bảng ngưỡng cấp HO_DAN
-    public MucDoThietHai danhGiaMucDo() { return tinhThongKe().danhGiaMucDo(CapDanhGia.HO_DAN); }
+    // Danh gia muc do thiet hai cua ho theo bang nguong cap HO_DAN
+    public MucDoThietHai danhGiaMucDo() {
+        return tinhThongKe().danhGiaMucDo(CapDanhGia.HO_DAN);
+    }
 
-    public String getMaBanGhi() { return maBanGhi; }
-    public LocalDateTime getThoiGianGhiNhan() { return thoiGianGhiNhan; }
-    public HoDan getHoDan() { return hoDan; }
-    public ArrayList<ThietHaiTaiSanDan> getDsThietHaiTaiSan() { return dsThietHaiTaiSan; }
+    // Cac phuong thuc getter
+    public String getMaBanGhi() {
+        return maBanGhi;
+    }
+
+    public LocalDateTime getThoiGianGhiNhan() {
+        return thoiGianGhiNhan;
+    }
+
+    public HoDan getHoDan() {
+        return hoDan;
+    }
+
+    // Tra ve ban sao danh sach trang thai nguoi
+    public HashMap<String, TrangThaiNguoi> getDsTrangThaiNguoi() {
+        return new HashMap<>(dsTrangThaiNguoi);
+    }
+
+    // Tra ve ban sao danh sach thiet hai tai san
+    public ArrayList<ThietHaiTaiSanDan> getDsThietHaiTaiSan() {
+        return new ArrayList<>(dsThietHaiTaiSan);
+    }
 }
-

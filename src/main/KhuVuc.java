@@ -156,7 +156,13 @@ public class KhuVuc {
         return dsThietHaiCoSoVatChatNN.size();
     }
 
-    // Trả về bản sao danh sách bản ghi
+    public void setDsThietHaiCoSoVatChatNN(HashMap<String, ThietHaiCoSoVatChat_NN> dsThietHaiCoSoVatChatNN) {
+		this.dsThietHaiCoSoVatChatNN = dsThietHaiCoSoVatChatNN;
+	}
+
+
+
+	// Trả về bản sao danh sách bản ghi
     public HashMap<String, ThietHaiCoSoVatChat_NN>
             getDsThietHaiCoSoVatChatNN() {
         return new HashMap<>(dsThietHaiCoSoVatChatNN);

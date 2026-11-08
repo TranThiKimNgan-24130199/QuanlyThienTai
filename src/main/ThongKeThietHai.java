@@ -24,7 +24,7 @@ public class ThongKeThietHai {
     private long tongGiaTriCauDuong;
     private long tongGiaTriCongTrinhCong;
 
-    // ----- ghi dữ liệu (các lớp thiệt hại gọi để đẩy số liệu vào thống kê) -----
+    //  ghi dữ liệu (các lớp thiệt hại gọi để đẩy số liệu vào thống kê) 
 
     //Ghi (đặt lại) số người chết, mất tích, bị thương vào bản thống kê
     public void capNhatSoNguoi(int chet, int matTich, int biThuong) {

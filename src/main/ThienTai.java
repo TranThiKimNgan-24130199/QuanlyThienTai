@@ -7,9 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
-import trangthai.LoaiThienTai;
-import trangthai.MucDoThietHai;
-import trangthai.TrangThaiThienTai;
+import trangthai.*;
 
 public class ThienTai {
     private String maTT;
@@ -93,10 +91,17 @@ public class ThienTai {
      * và thiệt hại cơ sở vật chất của mọi khu vực thuộc thiên tai
      */
     public ThongKeThietHai thongKeToanBo() {
+
         ThongKeThietHai tk = new ThongKeThietHai();
-        for (BanGhiThietHaiHoDan b : dsBanGhi.values()) tk.cong(b.tinhThongKe());
-        for (KhuVuc kv : dsKhuVuc.values())
-            for (ThietHaiCoSoVatChatNN t : kv.getDsThietHaiCoSoVatChat()) t.capNhatThongTinThongKe(tk);
+
+        for (BanGhiThietHaiHoDan b : dsBanGhi.values())
+            tk.cong(b.tinhThongKe());
+
+        for (KhuVuc kv : dsKhuVuc.values()) {
+            for (ThietHaiCoSoVatChat_NN t : kv.getDsThietHaiCoSoVatChatNN().values())
+                t.capNhatThongTinThongKe(tk);
+        }
+
         return tk;
     }
 
@@ -105,15 +110,25 @@ public class ThienTai {
      * và thiệt hại cơ sở vật chất của khu vực. Ném IllegalArgumentException nếu khu vực không thuộc thiên tai
      */
     public ThongKeThietHai thongKeKhuVuc(String maKV) {
+
         KhuVuc kv = dsKhuVuc.get(maKV);
-        if (kv == null) throw new IllegalArgumentException("Khu vực không thuộc thiên tai: " + maKV);
+
+        if (kv == null)
+            throw new IllegalArgumentException("Khu vực không thuộc thiên tai: " + maKV);
+
         ThongKeThietHai tk = new ThongKeThietHai();
-        for (BanGhiThietHaiHoDan b : dsBanGhi.values())
-            if (b.getHoDan().getKhuVuc().getMaKV().equals(maKV)) tk.cong(b.tinhThongKe());
-        for (ThietHaiCoSoVatChatNN t : kv.getDsThietHaiCoSoVatChat()) t.capNhatThongTinThongKe(tk);
+
+        for (BanGhiThietHaiHoDan b : dsBanGhi.values()) {
+            if (b.getHoDan().getKhuVuc() == kv)
+                tk.cong(b.tinhThongKe());
+        }
+
+        for (ThietHaiCoSoVatChat_NN t : kv.getDsThietHaiCoSoVatChatNN().values()) {
+            t.capNhatThongTinThongKe(tk);
+        }
+
         return tk;
     }
-
     // ---------- đánh giá ----------
 
     //Đánh giá mức độ thiệt hại của một khu vực: lấy thống kê khu vực rồi chấm theo bảng ngưỡng cấp KHU_VUC

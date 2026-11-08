@@ -1,6 +1,9 @@
+
 package main;
-//số công trình bị sập được tính riêng, không cộng trùng vào số công trình bị hư hỏng. 
+
+//số công trình bị sập được tính riêng, không cộng trùng vào số công trình bị hư hỏng.
 //Ví dụ, 3 công trình hư hỏng và 2 công trình sập nghĩa là tổng cộng 5 công trình bị ảnh hưởng.
+
 public class ThietHaiCongTrinhCong extends ThietHaiCoSoVatChat_NN {
 
     private int soCongTrinhBiHuHong;
@@ -14,7 +17,7 @@ public class ThietHaiCongTrinhCong extends ThietHaiCoSoVatChat_NN {
     // và tổng giá trị thiệt hại
     public void capNhatCongTrinh(int soCongTrinhBiHuHong,
                                  int soCongTrinhBiSapDo,
-                                 double tongGiaTriThietHai) {
+                                 long tongGiaTriThietHai) {
 
         if (soCongTrinhBiHuHong < 0 || soCongTrinhBiSapDo < 0
                 || tongGiaTriThietHai < 0) {
@@ -28,8 +31,10 @@ public class ThietHaiCongTrinhCong extends ThietHaiCoSoVatChat_NN {
     }
 
     @Override
-    public double tinhTongThietHai() {
-        return getTongGiaTriThietHai();
+    public void capNhatThongTinThongKe(ThongKeThietHai tk) {
+        if (tk == null) return;
+
+        tk.themGiaTriCongTrinhCong(tinhTongThietHai());
     }
 
     @Override

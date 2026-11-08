@@ -1,6 +1,9 @@
+
 package main;
+
 //So cau duong bi sap duoc tinh rieng, khong cong trung vao so cau duong bi hu hong.
 //Vi du, 3 cau duong hu hong va 2 cau duong sap nghia la tong cong 5 doi tuong bi anh huong.
+
 public class ThietHaiCauDuong extends ThietHaiCoSoVatChat_NN {
 
     private int soCauBiHuHong;
@@ -13,7 +16,7 @@ public class ThietHaiCauDuong extends ThietHaiCoSoVatChat_NN {
     // Cập nhật số lượng cầu đường bị thiệt hại và tổng giá trị thiệt hại
     public void capNhatCauDuong(int soCauBiHuHong,
                                 int soCauBiSap,
-                                double tongGiaTriThietHai) {
+                                long tongGiaTriThietHai) {
 
         if (soCauBiHuHong < 0 || soCauBiSap < 0
                 || tongGiaTriThietHai < 0) {
@@ -27,8 +30,10 @@ public class ThietHaiCauDuong extends ThietHaiCoSoVatChat_NN {
     }
 
     @Override
-    public double tinhTongThietHai() {
-        return getTongGiaTriThietHai();
+    public void capNhatThongTinThongKe(ThongKeThietHai tk) {
+        if (tk == null) return;
+
+        tk.themGiaTriCauDuong(tinhTongThietHai());
     }
 
     @Override
