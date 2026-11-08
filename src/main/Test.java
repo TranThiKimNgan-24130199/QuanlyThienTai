@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 
 import trangthai.*;
 
@@ -29,9 +30,9 @@ public class Test {
 
         // 2. Hai hộ dân, mỗi hộ có một chủ hộ 
         NguoiDan lan = new NguoiDan("079000000001", "Nguyễn Thị Hoài Lan", GioiTinh.NU,
-                LocalDate.of(1985, 3, 15), TinhTrangHonNhan.DA_KET_HON, QuanHeChuHo.CHU_HO);
+                LocalDate.of(2006, 10, 15), TinhTrangHonNhan.DA_KET_HON, QuanHeChuHo.CHU_HO);
         NguoiDan ngan = new NguoiDan("079000000002", "Trần Thị Kim Ngân", GioiTinh.NU,
-                LocalDate.of(1990, 7, 20), TinhTrangHonNhan.DOC_THAN, QuanHeChuHo.CHU_HO);
+                LocalDate.of(2006, 7, 28), TinhTrangHonNhan.DOC_THAN, QuanHeChuHo.CHU_HO);
 
         HoDan hoLan = new HoDan("HD01", "12 Nguyễn Văn Linh", lan);
         HoDan hoNgan = new HoDan("HD02", "25 Lê Duẩn", ngan);
@@ -93,7 +94,7 @@ public class Test {
         System.out.println("Tổng thiệt hại (VNĐ): " + dinhDangTien(tk.tongGiaTriVatChat()));
         System.out.println("Mức độ thiệt hại khu vực: " + tenMucDo(thienTai.danhGiaKhuVuc(khuVuc.getMaKV())));
 
-        // Đếm số hộ của khu vực này theo từng mức độ (EnumMap duyệt theo thứ tự mức nhẹ đến nặng)
+        // Đếm số hộ của khu vực này theo từng mức độ
         Map<MucDoThietHai, List<HoDan>> nhomHo = thienTai.nhomHoTheoMucDo();
 
         for (Map.Entry<MucDoThietHai, List<HoDan>> e : nhomHo.entrySet()) {
@@ -112,6 +113,17 @@ public class Test {
                             + tenMucDo(e.getKey()));
                 }
             }
+        }
+
+        // Danh sách cơ sở vật chất Nhà nước bị thiệt hại tại khu vực
+        System.out.println("Cơ sở vật chất Nhà nước bị thiệt hại:");
+        Map<String, ThietHaiCoSoVatChat_NN> dsCSVC = new TreeMap<>(khuVuc.getDsThietHaiCoSoVatChatNN());
+        if (dsCSVC.isEmpty()) {
+            System.out.println("- (không có)");
+        }
+        for (ThietHaiCoSoVatChat_NN csvc : dsCSVC.values()) {
+            System.out.println("- Mã CSVC: " + csvc.getMaCSVC() + " | Loại: " + csvc.getLoaiCSVC()
+                    + " | Thiệt hại (VNĐ): " + dinhDangTien(csvc.tinhTongThietHai()));
         }
     }
 

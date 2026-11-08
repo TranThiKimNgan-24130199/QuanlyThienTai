@@ -1,5 +1,5 @@
 package main;
-
+//Người thực hiện: Trần Thị Kim Ngân
 public class ThietHaiNhaCua extends ThietHaiTaiSanDan {
     private int soNhaSapHoanToan;
     private int soNhaHuHong;

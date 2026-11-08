@@ -1,6 +1,6 @@
 
 package main;
-
+//Người thực hiện: Nguyễn Thị Hoài Lan
 public abstract class ThietHaiCoSoVatChat_NN extends ThietHaiVatChat {
 
     // Ma dinh danh cua tung co so vat chat Nha nuoc

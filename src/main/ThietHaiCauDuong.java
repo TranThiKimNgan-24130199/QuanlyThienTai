@@ -1,6 +1,6 @@
 
 package main;
-
+//Người thực hiện: Nguyễn Thị Hoài Lan
 //So cau duong bi sap duoc tinh rieng, khong cong trung vao so cau duong bi hu hong.
 //Vi du, 3 cau duong hu hong va 2 cau duong sap nghia la tong cong 5 doi tuong bi anh huong.
 
