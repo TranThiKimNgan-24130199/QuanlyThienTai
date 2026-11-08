@@ -1,37 +1,49 @@
 package main;
+//số công trình bị sập được tính riêng, không cộng trùng vào số công trình bị hư hỏng. 
+//Ví dụ, 3 công trình hư hỏng và 2 công trình sập nghĩa là tổng cộng 5 công trình bị ảnh hưởng.
+public class ThietHaiCongTrinhCong extends ThietHaiCoSoVatChat_NN {
 
-public class ThietHaiCongTrinhCong extends ThietHaiCoSoVatChatNN {
     private int soCongTrinhBiHuHong;
     private int soCongTrinhBiSapDo;
 
-    public ThietHaiCongTrinhCong(String maCSVC) { 
-    	super(maCSVC, "CONG_TRINH_CONG"); 
-    	}
+    public ThietHaiCongTrinhCong(String maCSVC) {
+        super(maCSVC, "CONG_TRINH_CONG");
+    }
 
-    public void capNhatCongTrinh(int soCongTrinhBiHuHong, int soCongTrinhBiSapDo, double tongGiaTriThietHai) {
+    // Cập nhật số lượng công trình công bị thiệt hại
+    // và tổng giá trị thiệt hại
+    public void capNhatCongTrinh(int soCongTrinhBiHuHong,
+                                 int soCongTrinhBiSapDo,
+                                 double tongGiaTriThietHai) {
+
+        if (soCongTrinhBiHuHong < 0 || soCongTrinhBiSapDo < 0
+                || tongGiaTriThietHai < 0) {
+            throw new IllegalArgumentException("Du lieu thiet hai khong hop le");
+        }
+
         this.soCongTrinhBiHuHong = soCongTrinhBiHuHong;
         this.soCongTrinhBiSapDo = soCongTrinhBiSapDo;
+
         capNhatGiaTriThietHai(tongGiaTriThietHai);
     }
 
-    @Override 
-    public double tinhTongThietHai() { 
-    	return getTongGiaTriThietHai(); 
-    	}
-
-    @Override 
-    public boolean kiemTraHopLe() {
-//        return super.kiemTraHopLe() && soCongTrinhBiHuHong >= 0 && soCongTrinhBiSapDo >= 0;
-    	return false;
+    @Override
+    public double tinhTongThietHai() {
+        return getTongGiaTriThietHai();
     }
 
-	public int getSoCongTrinhBiHuHong() {
-		return soCongTrinhBiHuHong;
-	}
+    @Override
+    public boolean kiemTraHopLe() {
+        return super.kiemTraHopLe()
+                && soCongTrinhBiHuHong >= 0
+                && soCongTrinhBiSapDo >= 0;
+    }
 
-	public int getSoCongTrinhBiSapDo() {
-		return soCongTrinhBiSapDo;
-	}
+    public int getSoCongTrinhBiHuHong() {
+        return soCongTrinhBiHuHong;
+    }
 
-   
+    public int getSoCongTrinhBiSapDo() {
+        return soCongTrinhBiSapDo;
+    }
 }

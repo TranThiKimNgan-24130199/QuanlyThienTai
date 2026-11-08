@@ -1,72 +1,63 @@
 package main;
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class BaoCao {
+
     private String maBaoCao;
     private String tenBaoCao;
     private LocalDateTime thoiGianLap;
-    private LocalDateTime tuNgay;
-    private LocalDateTime denNgay;
-    private List<ThienTai> dsThienTai = new ArrayList<>(); 
 
-    public BaoCao(String maBaoCao, String tenBaoCao) {
+    // Thien tai duoc lap bao cao
+    private ThienTai thienTai;
+
+    // Khu vuc duoc lap bao cao
+    private KhuVuc khuVuc;
+
+    // Khoi tao bao cao cho mot thien tai tai mot khu vuc cu the
+    public BaoCao(String maBaoCao, String tenBaoCao,
+                  ThienTai thienTai, KhuVuc khuVuc) {
+
+        if (maBaoCao == null || maBaoCao.trim().isEmpty()
+                || tenBaoCao == null || tenBaoCao.trim().isEmpty()
+                || thienTai == null || khuVuc == null) {
+            throw new IllegalArgumentException("Thong tin bao cao khong hop le");
+        }
+
         this.maBaoCao = maBaoCao;
         this.tenBaoCao = tenBaoCao;
+        this.thienTai = thienTai;
+        this.khuVuc = khuVuc;
+        this.thoiGianLap = LocalDateTime.now();
     }
 
-    public void taoBaoCao(List<ThienTai> nguon, LocalDateTime tuNgay, LocalDateTime denNgay) {
-//        this.tuNgay = tuNgay;
-//        this.denNgay = denNgay;
-//        this.thoiGianLap = LocalDateTime.now();
-//        dsThienTai.clear();
-//        for (ThienTai t : nguon)
-//            if (!t.getThoiGianBatDau().isBefore(tuNgay) && !t.getThoiGianBatDau().isAfter(denNgay))
-//                dsThienTai.add(t);
-    }
-
-    public List<BanGhiThienTai> locTheoThienTai(String maTT) {
-		return null;
-//        List<BanGhiThienTai> kq = new ArrayList<>();
-//        for (ThienTai t : dsThienTai)
-//            if (t.getMaTT().equals(maTT)) kq.addAll(t.getDsBanGhi().values());
-//        return kq;
-    }
-
-    public List<BanGhiThienTai> locTheoKhuVuc(String maKV) {
-		return null;
-//        List<BanGhiThienTai> kq = new ArrayList<>();
-//        for (ThienTai t : dsThienTai)
-//            for (BanGhiThienTai b : t.getDsBanGhi().values())
-//                if (b.getKhuVuc().getMaKV().equals(maKV)) kq.add(b);
-//        return kq;
-    }
-
+    // Kiem tra thong tin bao cao hop le
     public boolean kiemTraHopLe() {
-    	return false;
+        return maBaoCao != null && !maBaoCao.trim().isEmpty()
+                && tenBaoCao != null && !tenBaoCao.trim().isEmpty()
+                && thoiGianLap != null
+                && thienTai != null
+                && khuVuc != null;
     }
-// getter
-	public String getMaBaoCao() {
-		return maBaoCao;
-	}
 
-	public String getTenBaoCao() {
-		return tenBaoCao;
-	}
+    // Cac phuong thuc getter
+    public String getMaBaoCao() {
+        return maBaoCao;
+    }
 
-	public LocalDateTime getThoiGianLap() {
-		return thoiGianLap;
-	}
+    public String getTenBaoCao() {
+        return tenBaoCao;
+    }
 
-	public LocalDateTime getTuNgay() {
-		return tuNgay;
-	}
+    public LocalDateTime getThoiGianLap() {
+        return thoiGianLap;
+    }
 
-	public LocalDateTime getDenNgay() {
-		return denNgay;
-	}
+    public ThienTai getThienTai() {
+        return thienTai;
+    }
 
-  
+    public KhuVuc getKhuVuc() {
+        return khuVuc;
+    }
 }
-
