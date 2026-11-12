@@ -3,8 +3,7 @@ package main;
 import trangthai.CapNganSach;
 import trangthai.NhomNguon;
 
-/*
- * Nguồn kinh phí từ ngân sách Nhà nước (trung ương hoặc tỉnh)
+/* Nguồn kinh phí từ ngân sách Nhà nước (trung ương hoặc tỉnh)
  * Chỉ ghi nhận phần thu (đóng góp); không phân mức độ đóng góp cho nguồn này
  */
 public class NguonNhaNuoc extends NguonKinhPhi {

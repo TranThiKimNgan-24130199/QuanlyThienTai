@@ -12,8 +12,7 @@ public enum MucDoDongGop {
 	private static final long[] NGUONG_TAP_THE = {10_000_000L, 50_000_000L, 200_000_000L};
 	private static final long[] NGUONG_CONG_TY = {50_000_000L, 200_000_000L, 1_000_000_000L};
 
-	/*
-	 * Phân loại mức độ đóng góp theo nhóm nguồn và tổng số tiền đã đóng góp
+	/* Phân loại mức độ đóng góp theo nhóm nguồn và tổng số tiền đã đóng góp
 	 * Trả về null nếu nhóm null, là NHA_NUOC (không phân mức độ) hoặc số tiền âm
 	 */
 	public static MucDoDongGop phanLoai(NhomNguon nhom, long tongSoTien) {
