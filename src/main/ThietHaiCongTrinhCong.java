@@ -1,6 +1,6 @@
 
 package main;
-//Người thực hiện: Nguyễn Thị Hoài Lan
+
 //số công trình bị sập được tính riêng, không cộng trùng vào số công trình bị hư hỏng.
 //Ví dụ, 3 công trình hư hỏng và 2 công trình sập nghĩa là tổng cộng 5 công trình bị ảnh hưởng.
 
@@ -9,8 +9,8 @@ public class ThietHaiCongTrinhCong extends ThietHaiCoSoVatChat_NN {
     private int soCongTrinhBiHuHong;
     private int soCongTrinhBiSapDo;
 
-    public ThietHaiCongTrinhCong(String maCSVC) {
-        super(maCSVC, "CONG_TRINH_CONG");
+    public ThietHaiCongTrinhCong(String maCSVC, String maTT) {
+        super(maCSVC, "CONG_TRINH_CONG", maTT);
     }
 
     // Cập nhật số lượng công trình công bị thiệt hại

@@ -2,8 +2,9 @@ package main;
 
 import trangthai.CapDanhGia;
 import trangthai.MucDoThietHai;
-//Người thực hiện: Trần Thị Kim Ngân
-/* Lớp tổng hợp số liệu thiệt hại (người + vật chất) cho một hộ, một khu vực
+
+/*
+ * Lớp tổng hợp số liệu thiệt hại (người + vật chất) cho một hộ, một khu vực
  * hoặc toàn bộ một thiên tai. Dùng để cộng dồn số liệu và đánh giá mức độ thiệt hại.
  */
 public class ThongKeThietHai {
@@ -76,7 +77,8 @@ public class ThongKeThietHai {
     	return soNguoiChet + soNguoiMatTich + soNguoiBiThuong; 
    }
 
-    /* Đánh giá mức độ thiệt hại theo cấp (hộ dân hoặc khu vực).
+    /*
+     * Đánh giá mức độ thiệt hại theo cấp (hộ dân hoặc khu vực).
      * Chấm ba tiêu chí độc lập (giá trị vật chất, số chết + mất tích, số bị thương)
      * theo bảng ngưỡng của cấp đó, rồi lấy mức cao nhất trong ba tiêu chí.
      */

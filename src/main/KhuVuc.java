@@ -1,6 +1,6 @@
 
 package main;
-//Người thực hiện: Nguyễn Thị Hoài Lan
+
 
 import java.util.HashMap;
 
@@ -122,14 +122,12 @@ public class KhuVuc {
     }
 
     public HashMap<String, HoDan> getDsHoDan() {
-		return dsHoDan;
+		// Tra ve ban sao de ben ngoai khong sua truc tiep danh sach noi bo
+		return new HashMap<>(dsHoDan);
 	}
 
 
 
-	public void setDsHoDan(HashMap<String, HoDan> dsHoDan) {
-		this.dsHoDan = dsHoDan;
-	}
 
 
 
@@ -156,9 +154,6 @@ public class KhuVuc {
         return dsThietHaiCoSoVatChatNN.size();
     }
 
-    public void setDsThietHaiCoSoVatChatNN(HashMap<String, ThietHaiCoSoVatChat_NN> dsThietHaiCoSoVatChatNN) {
-		this.dsThietHaiCoSoVatChatNN = dsThietHaiCoSoVatChatNN;
-	}
 
 
 

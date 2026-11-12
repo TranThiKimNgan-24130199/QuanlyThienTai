@@ -1,6 +1,6 @@
 
 package main;
-//Người thực hiện: Nguyễn Thị Hoài Lan
+
 import java.util.HashMap;
 import java.util.TreeMap;
 
@@ -41,7 +41,19 @@ public class QuanLyThienTai {
         if (maTT == null || maTT.trim().isEmpty())
             return false;
 
-        return dsThienTai.remove(maTT) != null;
+        if (!dsThienTai.containsKey(maTT))
+            return false;
+
+        // Xoa cac khoan thiet hai co so vat chat gan voi thien tai nay o moi khu vuc
+        for (KhuVuc khuVuc : dsKhuVuc.values()) {
+            for (ThietHaiCoSoVatChat_NN t : khuVuc.getDsThietHaiCoSoVatChatNN().values()) {
+                if (maTT.equals(t.getMaTT()))
+                    khuVuc.xoaCoSoVatChat(t.getMaCSVC());
+            }
+        }
+
+        dsThienTai.remove(maTT);
+        return true;
     }
 
     // Tim kiem su kien thien tai bang ma thien tai
@@ -107,6 +119,18 @@ public class QuanLyThienTai {
             return null;
 
         return dsKhuVuc.get(maKV);
+    }
+
+    // Gan mot khu vuc da duoc he thong quan ly vao mot thien tai da duoc he thong quan ly
+    public boolean themKhuVucVaoThienTai(String maTT, String maKV) {
+
+        ThienTai thienTai = timThienTai(maTT);
+        KhuVuc khuVuc = timKhuVuc(maKV);
+
+        if (thienTai == null || khuVuc == null)
+            return false;
+
+        return thienTai.themKhuVuc(khuVuc);
     }
 
     // Dem tong so khu vuc dang duoc quan ly
@@ -266,6 +290,10 @@ public class QuanLyThienTai {
 
         // Dam bao ma CSVC duy nhat tren toan he thong
         if (kiemTraMaCSVC(maCSVC))
+            return false;
+
+        // Thiet hai phai thuoc mot thien tai dang duoc he thong quan ly
+        if (timThienTai(coSo.getMaTT()) == null)
             return false;
 
         // Kiem tra tinh hop le cua doi tuong truoc khi them

@@ -1,6 +1,6 @@
 
 package main;
-//Người thực hiện: Trần Thị Kim Ngân
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,6 +63,15 @@ public class BanGhiThietHaiHoDan {
             return false;
         }
 
+        // Dong bo tinh trang song cua nguoi dan voi trang thai thiet hai:
+        // ghi TU_VONG thi khong con song; sua lai tu TU_VONG sang trang thai khac thi con song tro lai
+        NguoiDan nguoi = hoDan.timThanhVien(cccd);
+        TrangThaiNguoi trangThaiCu = dsTrangThaiNguoi.get(cccd);
+        if (trangThai == TrangThaiNguoi.TU_VONG) {
+            nguoi.capNhatConSong(false);
+        } else if (trangThaiCu == TrangThaiNguoi.TU_VONG) {
+            nguoi.capNhatConSong(true);
+        }
         dsTrangThaiNguoi.put(cccd, trangThai);
         return true;
     }

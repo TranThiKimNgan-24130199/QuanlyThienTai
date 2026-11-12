@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 import trangthai.*;
-//Người thực hiện: Trần Thị Kim Ngân
+
 public class ThienTai {
     private String maTT;
     private String ten;
@@ -22,12 +22,16 @@ public class ThienTai {
 
     //Tạo thiên tai mới ở trạng thái DANG_DIEN_RA, chưa có khu vực và bản ghi nào
     public ThienTai(String maTT, String ten, LoaiThienTai loaiThienTai, LocalDateTime thoiGianBatDau, String moTa) {
+        if (maTT == null || maTT.trim().isEmpty())
+            throw new IllegalArgumentException("Mã thiên tai không hợp lệ");
         this.maTT = maTT;
         capNhatThongTin(ten, loaiThienTai, thoiGianBatDau, moTa);
     }
 
     //Cập nhật thông tin mô tả của thiên tai (tên, loại, thời gian bắt đầu, mô tả); mã không đổi
     public void capNhatThongTin(String ten, LoaiThienTai loai, LocalDateTime thoiGianBatDau, String moTa) {
+        if (ten == null || ten.trim().isEmpty() || loai == null || thoiGianBatDau == null)
+            throw new IllegalArgumentException("Thông tin thiên tai không hợp lệ");
         this.ten = ten;
         this.loaiThienTai = loai;
         this.thoiGianBatDau = thoiGianBatDau;
@@ -88,7 +92,7 @@ public class ThienTai {
 
     /*
      * Thống kê toàn thiên tai: cộng thống kê của từng bản ghi hộ dân
-     * và thiệt hại cơ sở vật chất của mọi khu vực thuộc thiên tai
+     * và thiệt hại cơ sở vật chất (chỉ khoản ghi cho thiên tai này) của mọi khu vực thuộc thiên tai
      */
     public ThongKeThietHai thongKeToanBo() {
 
@@ -99,7 +103,8 @@ public class ThienTai {
 
         for (KhuVuc kv : dsKhuVuc.values()) {
             for (ThietHaiCoSoVatChat_NN t : kv.getDsThietHaiCoSoVatChatNN().values())
-                t.capNhatThongTinThongKe(tk);
+                if (maTT.equals(t.getMaTT()))   // chỉ tính thiệt hại ghi cho chính thiên tai này
+                    t.capNhatThongTinThongKe(tk);
         }
 
         return tk;
@@ -107,7 +112,7 @@ public class ThienTai {
 
     /*
      * Thống kê riêng một khu vực: cộng thống kê các bản ghi của hộ thuộc khu vực đó
-     * và thiệt hại cơ sở vật chất của khu vực. Ném IllegalArgumentException nếu khu vực không thuộc thiên tai
+     * và thiệt hại cơ sở vật chất của khu vực (chỉ khoản ghi cho thiên tai này). Ném IllegalArgumentException nếu khu vực không thuộc thiên tai
      */
     public ThongKeThietHai thongKeKhuVuc(String maKV) {
 
@@ -124,6 +129,8 @@ public class ThienTai {
         }
 
         for (ThietHaiCoSoVatChat_NN t : kv.getDsThietHaiCoSoVatChatNN().values()) {
+            if (!maTT.equals(t.getMaTT()))      // bỏ qua thiệt hại ghi cho thiên tai khác
+                continue;
             t.capNhatThongTinThongKe(tk);
         }
 
@@ -189,11 +196,13 @@ public class ThienTai {
 	}
 
 	public HashMap<String, KhuVuc> getDsKhuVuc() {
-		return dsKhuVuc;
+		// Tra ve ban sao de ben ngoai khong sua truc tiep danh sach noi bo
+		return new HashMap<>(dsKhuVuc);
 	}
 
 	public TreeMap<String, BanGhiThietHaiHoDan> getDsBanGhi() {
-		return dsBanGhi;
+		// Tra ve ban sao de ben ngoai khong sua truc tiep danh sach noi bo
+		return new TreeMap<>(dsBanGhi);
 	}
 
   
