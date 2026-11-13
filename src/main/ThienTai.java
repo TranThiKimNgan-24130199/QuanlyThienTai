@@ -18,7 +18,9 @@ public class ThienTai {
     private String moTa;
     private TrangThaiThienTai trangThai = TrangThaiThienTai.DANG_DIEN_RA;
     private HashMap<String, KhuVuc> dsKhuVuc = new HashMap<>();                
-    private TreeMap<String, BanGhiThietHaiHoDan> dsBanGhi = new TreeMap<>();   
+    private TreeMap<String, BanGhiThietHaiHoDan> dsBanGhi = new TreeMap<>();
+    // Phần khắc phục (kinh phí huy động...) của thiên tai này: quan hệ 1-1, tạo cùng lúc với thiên tai
+    private KhacPhucThienTai khacPhuc;
 
     //Tạo thiên tai mới ở trạng thái DANG_DIEN_RA, chưa có khu vực và bản ghi nào
     public ThienTai(String maTT, String ten, LoaiThienTai loaiThienTai, LocalDateTime thoiGianBatDau, String moTa) {
@@ -26,6 +28,8 @@ public class ThienTai {
             throw new IllegalArgumentException("Mã thiên tai không hợp lệ");
         this.maTT = maTT;
         capNhatThongTin(ten, loaiThienTai, thoiGianBatDau, moTa);
+        // Đặt cuối constructor, khi các thuộc tính của thiên tai đã đầy đủ rồi mới truyền this đi
+        this.khacPhuc = new KhacPhucThienTai(this);
     }
 
     //Cập nhật thông tin mô tả của thiên tai (tên, loại, thời gian bắt đầu, mô tả); mã không đổi
@@ -189,6 +193,11 @@ public class ThienTai {
 
 	public String getMoTa() {
 		return moTa;
+	}
+
+	// Phần khắc phục của thiên tai này (luôn có, không bao giờ null)
+	public KhacPhucThienTai getKhacPhuc() {
+		return khacPhuc;
 	}
 
 	public TrangThaiThienTai getTrangThai() {
