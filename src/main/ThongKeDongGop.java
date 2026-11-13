@@ -57,9 +57,9 @@ public class ThongKeDongGop {
                 throw new IllegalArgumentException("Danh sách nguồn kinh phí có phần tử null");
             }
 
-            String maBen = nguon.getMaBen();
-            NhomNguon nhom = nguon.getNhom();
-            long soTien = nguon.getSoTien();
+            String maBen = nguon.getMaNguon();
+            NhomNguon nhom = nguon.getNhomNguon();
+            long soTien = nguon.getTongSoTien();
 
             // Một bên chỉ được thuộc một nhóm; nếu dữ liệu mâu thuẫn thì báo lỗi ngay
             // vì nếu bỏ qua thì mức đóng góp của bên đó sẽ bị tính sai.

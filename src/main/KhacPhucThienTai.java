@@ -57,13 +57,13 @@ public class KhacPhucThienTai {
         }
 
         // Nhóm Nhà nước phải là NguonNhaNuoc (mới có cấp ngân sách)
-        if (nguon.getNhom() == NhomNguon.NHA_NUOC && !(nguon instanceof NguonNhaNuoc)) {
+        if (nguon.getNhomNguon() == NhomNguon.NHA_NUOC && !(nguon instanceof NguonNhaNuoc)) {
             return false;
         }
 
         // Một bên (maBen) chỉ được thuộc một nhóm, trái nhóm thì từ chối ngay
         for (NguonKinhPhi n : dsNguonKinhPhi.values()) {
-            if (n.getMaBen().equals(nguon.getMaBen()) && n.getNhom() != nguon.getNhom()) {
+            if (n.getMaNguon().equals(nguon.getMaNguon()) && n.getNhomNguon() != nguon.getNhomNguon()) {
                 return false;
             }
         }
@@ -103,7 +103,7 @@ public class KhacPhucThienTai {
     public long tinhTongKinhPhi() {
         long tong = 0;
         for (NguonKinhPhi n : dsNguonKinhPhi.values()) {
-            tong += n.getSoTien();
+            tong += n.getTongSoTien();
         }
         return tong;
     }
@@ -124,7 +124,7 @@ public class KhacPhucThienTai {
         for (NguonKinhPhi n : dsNguonKinhPhi.values()) {
             if (n instanceof NguonNhaNuoc) {
                 NguonNhaNuoc nn = (NguonNhaNuoc) n;
-                kq.put(nn.getCapNganSach(), kq.get(nn.getCapNganSach()) + n.getSoTien());
+                kq.put(nn.getCapNganSach(), kq.get(nn.getCapNganSach()) + n.getTongSoTien());
             }
         }
 
