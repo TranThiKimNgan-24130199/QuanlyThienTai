@@ -1,5 +1,5 @@
 package main;
-
+//người thực hiện: Nguyễn Thị Hoài Lan
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -12,20 +12,16 @@ import trangthai.NhomNguon;
 /*
  * ThongKeDongGop: thống kê các khoản đóng góp (thu) của MỘT thiên tai.
  *
- * Cách hoạt động: nhận một danh sách NguonKinhPhi (mỗi phần tử = một lần góp),
- * rồi trong constructor gom sẵn số liệu theo từng bên MỘT LẦN. Các hàm thống kê bên dưới
- * chỉ đọc từ số liệu đã gom, nên đơn giản và không phải duyệt lại danh sách nhiều lần.
- *
- * Đây là bản chụp (snapshot) tại thời điểm tạo: thêm khoản góp mới sau đó thì phải tạo
- * ThongKeDongGop mới. Cách này tránh việc thống kê bị lệch khi danh sách gốc thay đổi.
- *
+ * Cách hoạt động: nhận một danh sách NguonKinhPhi (mỗi phần tử = một bên đóng góp, đã cộng dồn
+ * các lần góp; "bên" được nhận diện bằng maNguon), rồi trong constructor gom sẵn số liệu MỘT LẦN.
+ * Các hàm thống kê bên dưới chỉ đọc từ số liệu đã gom, nên đơn giản và không phải duyệt lại nhiều lần.
  * QUY ƯỚC: nhóm NHA_NUOC là tiền ngân sách, không phải "đóng góp" nên KHÔNG được chấm mức,
  * không tính vào bên cao nhất / thấp nhất / trung bình mỗi bên. Nhưng vẫn được cộng vào
  * các tổng tiền, số lần góp, tỷ lệ theo nhóm (vì đó là tiền thực sự thu được).
  */
 public class ThongKeDongGop {
 
-    // Số lần góp (mỗi phần tử danh sách là một lần). Chỉ cần đếm nên lưu số.
+    // Tổng số lần góp của mọi nguồn (mỗi nguồn đã đếm số lần góp của nó). Chỉ cần đếm nên lưu số.
     private int soLanDongGop;
 
     // Tổng tiền của từng bên, khóa là maBen.
@@ -61,6 +57,12 @@ public class ThongKeDongGop {
             NhomNguon nhom = nguon.getNhomNguon();
             long soTien = nguon.getTongSoTien();
 
+            // Nguồn chưa góp đồng nào thì không có gì để thống kê, và sẽ làm sai
+            // bên thấp nhất, trung bình, và lỗi khi chấm mức
+            if (soTien <= 0) {
+                throw new IllegalArgumentException("Nguồn " + maBen + " chưa có đóng góp nào");
+            }
+
             // Một bên chỉ được thuộc một nhóm; nếu dữ liệu mâu thuẫn thì báo lỗi ngay
             // vì nếu bỏ qua thì mức đóng góp của bên đó sẽ bị tính sai.
             NhomNguon nhomDaCo = nhomCuaBen.get(maBen);
@@ -75,12 +77,12 @@ public class ThongKeDongGop {
             // Cộng dồn vào tổng của nhóm
             tongTheoNhom.put(nhom, tongTheoNhom.get(nhom) + soTien);
 
-            soLanDongGop++;
+            // Cộng số lần góp của nguồn này (không phải +1: một nguồn có thể góp nhiều đợt)
+            soLanDongGop += nguon.getSoLanDongGop();
         }
     }
 
-    // ==================== TỔNG TIỀN ====================
-
+    // tổng tiền
     // Tổng tiền thu được từ mọi bên, mọi nhóm
     public long tongDongGop() {
         long tong = 0;
@@ -101,8 +103,7 @@ public class ThongKeDongGop {
         return new EnumMap<>(tongTheoNhom);
     }
 
-    // ==================== ĐẾM ====================
-
+    // đếm
     // Số bên khác nhau đã góp (một bên góp nhiều lần vẫn chỉ tính 1)
     public int demSoBen() {
         return tongTheoBen.size();
@@ -125,8 +126,7 @@ public class ThongKeDongGop {
         return soLanDongGop;
     }
 
-    // ==================== TỶ LỆ ====================
-
+    // tỷ lệ
     // Tỷ lệ phần trăm (0..100) mỗi nhóm chiếm trong tổng tiền.
     // Chưa có khoản nào (tổng = 0) thì mọi tỷ lệ là 0.0 để tránh chia cho 0.
     public EnumMap<NhomNguon, Double> tyLeTheoNhom() {
@@ -139,8 +139,7 @@ public class ThongKeDongGop {
         return kq;
     }
 
-    // ==================== MỨC ĐÓNG GÓP ====================
-
+    // mức đóng góp
     // Mức đóng góp của một bên, chấm trên TỔNG tiền bên đó đã góp.
     // Ném lỗi nếu không có bên này hoặc bên đó là nhà nước (không chấm mức).
     public MucDoDongGop mucDoDongGop(String maBen) {
@@ -169,8 +168,7 @@ public class ThongKeDongGop {
         return kq;
     }
 
-    // ==================== BÊN CAO NHẤT / THẤP NHẤT / TRUNG BÌNH ====================
-
+    // bên cáo nhất, trung bình, thấp
     // Mã bên góp nhiều nhất (không tính nhà nước). Bằng nhau thì lấy maBen nhỏ hơn.
     // Không có bên nào thì trả null.
     public String benCaoNhat() {

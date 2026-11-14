@@ -11,9 +11,14 @@ import java.util.TreeMap;
 import trangthai.*;
 
 /*
- * Lớp chạy thử: dựng dữ liệu mẫu cho Bão số 5 rồi in một báo cáo thiệt hại đầy đủ.
- * Báo cáo gồm: thông tin thiên tai, tổng hợp, chi tiết từng khu vực
- * (cơ sở vật chất nhà nước, từng hộ dân, từng thành viên), danh sách theo mức độ.
+ * Lớp test duy nhất: dựng dữ liệu mẫu cho Bão số 5 (TT01) rồi in HAI báo cáo chi tiết,
+ * không in kết quả kiểm thử từng chức năng.
+ *
+ * 1. Báo cáo thiệt hại: thông tin thiên tai, tổng hợp, chi tiết từng khu vực
+ *    (cơ sở vật chất nhà nước, từng hộ dân, từng thành viên), danh sách theo mức độ.
+ * 2. Báo cáo kinh phí đóng góp khắc phục: chi tiết từng nguồn, tổng hợp theo nhóm,
+ *    kinh phí Nhà nước theo cấp ngân sách, bên cao nhất / thấp nhất / trung bình,
+ *    mức đóng góp, so sánh với thiệt hại.
  */
 public class Test {
 
@@ -28,6 +33,7 @@ public class Test {
     public static void main(String[] args) {
         dungDuLieu();
         inBaoCao(baoSo5);
+        inBaoCaoKinhPhi(baoSo5);
     }   
     //dữ liệu mẫu
     private static void dungDuLieu() {
@@ -499,6 +505,229 @@ public class Test {
             case CHA_ME:     return "Cha/mẹ";
             case ANH_CHI_EM: return "Anh/chị/em";
             default:         return "Khác";
+        }
+    }
+
+    //BỔ SUNG test: kinh phí các thứ, test các chức năng luôn
+
+    //6. Báo cáo kinh phí khắc phục
+
+    // Dựng các nguồn kinh phí mẫu cho thiên tai (mỗi nguồn là một bên, góp nhiều đợt thì cộng dồn)
+    private static void dungDuLieuKinhPhi(ThienTai tt) {
+
+        KhacPhucThienTai kp = tt.getKhacPhuc();
+        String ma = tt.getMaTT();
+
+        // Nhà nước
+        NguonNhaNuoc tw = new NguonNhaNuoc("KP01", "Ngân sách Trung ương", ma, CapNganSach.TRUNG_UONG);
+        batBuoc(tw.themDongGop(1_500_000_000L), "KP01 đợt 1");
+        batBuoc(tw.themDongGop(500_000_000L), "KP01 đợt 2");
+        NguonNhaNuoc tinh = new NguonNhaNuoc("KP02", "Ngân sách thành phố Đà Nẵng", ma, CapNganSach.TINH);
+        batBuoc(tinh.themDongGop(500_000_000L), "KP02 đợt 1");
+
+        // Cá nhân
+        NguonCaNhan an = new NguonCaNhan("KP03", "Nguyễn Văn An", ma, "079300000001");
+        batBuoc(an.themDongGop(500_000L), "KP03 đợt 1");
+        batBuoc(an.themDongGop(400_000L), "KP03 đợt 2");
+        batBuoc(an.themDongGop(200_000L), "KP03 đợt 3");
+        NguonCaNhan binh = new NguonCaNhan("KP04", "Trần Thị Bình", ma, "079300000002");
+        batBuoc(binh.themDongGop(900_000L), "KP04 đợt 1");
+        NguonCaNhan cuong = new NguonCaNhan("KP05", "Lê Văn Cường", ma, "079300000003");
+        batBuoc(cuong.themDongGop(3_000_000L), "KP05 đợt 1");
+        batBuoc(cuong.themDongGop(9_000_000L), "KP05 đợt 2");
+        NguonCaNhan dung = new NguonCaNhan("KP06", "Phạm Thị Dung", ma, "079300000004");
+        batBuoc(dung.themDongGop(25_000_000L), "KP06 đợt 1");
+
+        // Tập thể
+        NguonTapThe chuThapDo = new NguonTapThe("KP07", "Hội Chữ thập đỏ phường Thanh Bình", ma, "Nguyễn Văn Hòa");
+        batBuoc(chuThapDo.themDongGop(6_000_000L), "KP07 đợt 1");
+        batBuoc(chuThapDo.themDongGop(2_000_000L), "KP07 đợt 2");
+        NguonTapThe doan = new NguonTapThe("KP08", "Đoàn Thanh niên quận Hải Châu", ma, "Trần Minh Khoa");
+        batBuoc(doan.themDongGop(40_000_000L), "KP08 đợt 1");
+        NguonTapThe hoiDN = new NguonTapThe("KP09", "Hội Doanh nghiệp trẻ Đà Nẵng", ma, "Lê Thu Hà");
+        batBuoc(hoiDN.themDongGop(80_000_000L), "KP09 đợt 1");
+        batBuoc(hoiDN.themDongGop(40_000_000L), "KP09 đợt 2");
+
+        // Công ty
+        NguonCongTy abc = new NguonCongTy("KP10", "Công ty TNHH ABC", ma, "0101234567");
+        batBuoc(abc.themDongGop(400_000_000L), "KP10 đợt 1");
+        batBuoc(abc.themDongGop(200_000_000L), "KP10 đợt 2");
+        NguonCongTy xyz = new NguonCongTy("KP11", "Tập đoàn XYZ", ma, "0309876543-001");
+        batBuoc(xyz.themDongGop(3_000_000_000L), "KP11 đợt 1");
+        NguonCongTy minhPhat = new NguonCongTy("KP12", "Công ty CP Minh Phát", ma, "0200123456");
+        batBuoc(minhPhat.themDongGop(30_000_000L), "KP12 đợt 1");
+
+        NguonKinhPhi[] tatCa = { tw, tinh, an, binh, cuong, dung, chuThapDo, doan, hoiDN, abc, xyz, minhPhat };
+        for (NguonKinhPhi n : tatCa) {
+            batBuoc(kp.themNguon(n), "thêm nguồn " + n.getMaNguon());
+        }
+    }
+
+    // Báo cáo kinh phí: chi tiết từng nguồn, tổng hợp, mức đóng góp, so với thiệt hại
+    private static void inBaoCaoKinhPhi(ThienTai tt) {
+
+        dungDuLieuKinhPhi(tt);
+
+        KhacPhucThienTai kp = tt.getKhacPhuc();
+        ThongKeDongGop tk = kp.thongKeDongGop();
+        TreeMap<String, NguonKinhPhi> dsNguon = kp.getDsNguonKinhPhi();
+
+        dong("");
+        dong("");
+        dong("                    BÁO CÁO KINH PHÍ KHẮC PHỤC THIÊN TAI");
+
+        // 6.1 Tổng quan
+        int tongLan = 0;
+        for (NguonKinhPhi n : dsNguon.values()) {
+            tongLan += n.getSoLanDongGop();
+        }
+        dong("");
+        dong("6. TỔNG QUAN KINH PHÍ");
+        dong("Thiên tai                         : " + tt.getMaTT() + " - " + tt.getTen());
+        dong("Số nguồn kinh phí                 : " + kp.demSoNguon());
+        dong("Tổng số lần đóng góp (cộng từ từng nguồn): " + tongLan);
+        dong("Tổng số lần đóng góp (theo ThongKeDongGop): " + tk.demSoLanDongGop());
+        dong("Tổng kinh phí huy động            : " + tien(kp.tinhTongKinhPhi()));
+        dong("Tổng kinh phí (theo ThongKeDongGop): " + tien(tk.tongDongGop()));
+
+        // 6.2 Chi tiết từng nguồn theo nhóm
+        dong("");
+        dong("6.1. CHI TIẾT TỪNG NGUỒN KINH PHÍ");
+        for (NhomNguon nhom : NhomNguon.values()) {
+            int stt = 0;
+            for (NguonKinhPhi n : dsNguon.values()) {
+                if (n.getNhomNguon() == nhom) stt++;
+            }
+            dong("");
+            dong("   Nhóm " + tenNhomNguon(nhom) + " (" + stt + " nguồn)");
+            stt = 0;
+            for (NguonKinhPhi n : dsNguon.values()) {
+                if (n.getNhomNguon() != nhom) continue;
+                stt++;
+                inNguonKinhPhi(n, stt, tk);
+            }
+        }
+
+        // 6.3 Tổng hợp theo nhóm
+        dong("");
+        dong("6.2. TỔNG HỢP THEO NHÓM NGUỒN");
+        dong(String.format("   %-12s %8s %20s %10s", "Nhóm", "Số bên", "Tổng tiền", "Tỷ lệ"));
+        for (NhomNguon nhom : NhomNguon.values()) {
+            dong(String.format("   %-12s %8d %20s %9.2f%%", tenNhomNguon(nhom), tk.demSoBenTheoNhom().get(nhom),
+                    so(tk.tongTheoNhom().get(nhom)), tk.tyLeTheoNhom().get(nhom)));
+        }
+        dong(String.format("   %-12s %8d %20s %9.2f%%", "Cộng", tk.demSoBen(), so(tk.tongDongGop()), 100.0));
+
+        // 6.4 Kinh phí Nhà nước theo cấp ngân sách
+        dong("");
+        dong("6.3. KINH PHÍ NHÀ NƯỚC THEO CẤP NGÂN SÁCH");
+        long tongNhaNuoc = tk.tongTheoNhom().get(NhomNguon.NHA_NUOC);
+        for (Map.Entry<CapNganSach, Long> e : kp.tongNhaNuocTheoCapNganSach().entrySet()) {
+            double tyLe = tongNhaNuoc == 0 ? 0.0 : e.getValue() * 100.0 / tongNhaNuoc;
+            dong("   " + tenCapNganSach(e.getKey()) + ": " + tien(e.getValue()) + " (" + String.format(Locale.US, "%.2f", tyLe)
+                    + "% kinh phí Nhà nước)");
+        }
+        dong("   Tổng kinh phí Nhà nước: " + tien(tongNhaNuoc));
+
+        // 6.5 Các bên đóng góp (không gồm Nhà nước)
+        dong("");
+        dong("6.4. CÁC BÊN ĐÓNG GÓP (KHÔNG GỒM NHÀ NƯỚC)");
+        dong("   Số bên đóng góp        : " + (tk.demSoBen() - tk.demSoBenTheoNhom().get(NhomNguon.NHA_NUOC)));
+        dong("   Tổng tiền đóng góp     : " + tien(tk.tongDongGop() - tongNhaNuoc));
+        dong("   Trung bình mỗi bên     : " + tien(Math.round(tk.trungBinhMoiBen())));
+        inBenNoiBat("   Bên đóng góp cao nhất  : ", tk.benCaoNhat(), kp, tk);
+        inBenNoiBat("   Bên đóng góp thấp nhất : ", tk.benThapNhat(), kp, tk);
+
+        // 6.6 Đánh giá mức độ đóng góp
+        dong("");
+        dong("6.5. ĐÁNH GIÁ MỨC ĐỘ ĐÓNG GÓP");
+        for (MucDoDongGop m : MucDoDongGop.values()) {
+            List<String> ds = tk.danhSachBenTheoMucDo(m);
+            dong("   Mức " + tenMucDongGop(m) + ": " + ds.size() + " bên");
+            for (String maBen : ds) {
+                NguonKinhPhi n = kp.timNguon(maBen);
+                dong("      - " + maBen + " | " + n.getTenNguon() + " | nhóm " + tenNhomNguon(n.getNhomNguon()) + " | "
+                        + tien(n.getTongSoTien()));
+            }
+        }
+
+        // 6.7 So sánh với thiệt hại
+        long thietHai = tt.tinhTongThietHaiVatChat();
+        long kinhPhi = kp.tinhTongKinhPhi();
+        dong("");
+        dong("6.6. SO SÁNH KINH PHÍ VỚI THIỆT HẠI");
+        dong("   Tổng thiệt hại vật chất : " + tien(thietHai));
+        dong("   Tổng kinh phí huy động  : " + tien(kinhPhi));
+        if (thietHai > 0) {
+            dong("   Kinh phí / thiệt hại    : " + String.format(Locale.US, "%.2f", kinhPhi * 100.0 / thietHai) + "%");
+        }
+        dong("   " + (kinhPhi >= thietHai ? "Kinh phí vượt thiệt hại" : "Kinh phí còn thiếu so với thiệt hại") + " : "
+                + tien(Math.abs(kinhPhi - thietHai)));
+    }
+
+    // In một nguồn kinh phí: thông tin chung, thông tin riêng theo nhóm, mức đóng góp
+    private static void inNguonKinhPhi(NguonKinhPhi n, int stt, ThongKeDongGop tk) {
+
+        dong("   [" + stt + "] Mã nguồn       : " + n.getMaNguon());
+        dong("       Tên nguồn       : " + n.getTenNguon());
+        dong("       Thuộc thiên tai : " + n.getMaTT());
+
+        if (n instanceof NguonCaNhan) {
+            dong("       CCCD            : " + ((NguonCaNhan) n).getCCCD());
+        } else if (n instanceof NguonCongTy) {
+            dong("       Mã số thuế      : " + ((NguonCongTy) n).getMaSoThue());
+        } else if (n instanceof NguonTapThe) {
+            dong("       Người đại diện  : " + ((NguonTapThe) n).getNguoiDaiDien());
+        } else if (n instanceof NguonNhaNuoc) {
+            dong("       Cấp ngân sách   : " + tenCapNganSach(((NguonNhaNuoc) n).getCapNganSach()));
+        }
+
+        dong("       Số lần đóng góp : " + n.getSoLanDongGop());
+        dong("       Tổng số tiền    : " + tien(n.getTongSoTien()));
+
+        if (n.getNhomNguon() == NhomNguon.NHA_NUOC) {
+            dong("       Mức đóng góp    : không chấm mức (ngân sách Nhà nước)");
+        } else {
+            dong("       Mức đóng góp    : " + tenMucDongGop(tk.mucDoDongGop(n.getMaNguon())));
+        }
+    }
+
+    // In bên nổi bật (cao nhất / thấp nhất) kèm tên, nhóm, số tiền
+    private static void inBenNoiBat(String nhan, String maBen, KhacPhucThienTai kp, ThongKeDongGop tk) {
+        if (maBen == null) {
+            dong(nhan + "(chưa có bên nào)");
+            return;
+        }
+        NguonKinhPhi n = kp.timNguon(maBen);
+        dong(nhan + maBen + " - " + n.getTenNguon() + " | nhóm " + tenNhomNguon(n.getNhomNguon()) + " | "
+                + tien(n.getTongSoTien()) + " | mức " + tenMucDongGop(tk.mucDoDongGop(maBen)));
+    }
+
+    private static String tenNhomNguon(NhomNguon n) {
+        switch (n) {
+            case NHA_NUOC: return "Nhà nước";
+            case CA_NHAN:  return "Cá nhân";
+            case TAP_THE:  return "Tập thể";
+            case CONG_TY:  return "Công ty";
+            default:       return n.name();
+        }
+    }
+
+    private static String tenCapNganSach(CapNganSach c) {
+        switch (c) {
+            case TRUNG_UONG: return "Ngân sách Trung ương";
+            case TINH:       return "Ngân sách tỉnh";
+            default:         return c.name();
+        }
+    }
+
+    private static String tenMucDongGop(MucDoDongGop m) {
+        switch (m) {
+            case THAP:       return "Thấp";
+            case TRUNG_BINH: return "Trung bình";
+            case CAO:        return "Cao";
+            case RAT_CAO:    return "Rất cao";
+            default:         return m.name();
         }
     }
 }

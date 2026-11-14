@@ -1,12 +1,9 @@
 
 package main;
-
-
+//người thực hiện: Nguyễn Thị Hoài Lan
 import java.util.HashMap;
 
 public class KhuVuc {
-
-   
     private String maKV;
     private String tinhThanhPho;
     private String quanHuyen;
@@ -29,9 +26,6 @@ public class KhuVuc {
         this.maKV = maKV;
         capNhatThongTin(tinhThanhPho, quanHuyen, xaPhuong);
     }
-
-   
-
     public void capNhatThongTin(String tinhThanhPho,
                                 String quanHuyen, String xaPhuong) {
     	  if (tinhThanhPho == null || tinhThanhPho.trim().isEmpty()

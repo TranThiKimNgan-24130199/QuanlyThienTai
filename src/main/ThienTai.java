@@ -1,5 +1,6 @@
 package main;
-
+//người thực hiện: Trần Thị Kim Ngân
+//update chỉnh sửa cho phù hợp: Nguyễn Thị Hoài Lan
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -80,7 +81,7 @@ public class ThienTai {
         return true;
     }
 
-    // ---------- tổng hợp ----------
+    //tổng hợp
 
     //Tổng thiệt hại vật chất (tài sản dân + cơ sở vật chất nhà nước) của toàn thiên tai
     public long tinhTongThietHaiVatChat() { return thongKeToanBo().tongGiaTriVatChat(); }
@@ -140,7 +141,7 @@ public class ThienTai {
 
         return tk;
     }
-    // ---------- đánh giá ----------
+    //đánh giá
 
     //Đánh giá mức độ thiệt hại của một khu vực: lấy thống kê khu vực rồi chấm theo bảng ngưỡng cấp KHU_VUC
     public MucDoThietHai danhGiaKhuVuc(String maKV) {

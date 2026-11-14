@@ -1,5 +1,5 @@
 package main;
-
+//người thực hiện: Nguyễn Thị Hoài Lan
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.TreeMap;
@@ -16,16 +16,13 @@ import trangthai.NhomNguon;
  *  - ThienTai giữ đúng một KhacPhucThienTai (thuộc tính khacPhuc, tạo ngay trong constructor ThienTai).
  *  - KhacPhucThienTai giữ ngược lại thienTai của nó.
  *  Giống cách HoDan <-> KhuVuc đã làm. Xóa thiên tai thì khắc phục đi theo, không cần dọn riêng.
- *
- * Constructor để package-private (không có chữ public): chỉ ThienTai (cùng package) được tạo,
- * để không ai tạo ra một KhacPhucThienTai "mồ côi" hoặc tạo hai cái cho cùng một thiên tai.
  */
 public class KhacPhucThienTai {
 
     // Thiên tai mà phần khắc phục này thuộc về. final: gán một lần, không đổi.
     private final ThienTai thienTai;
 
-    // Các khoản kinh phí (mỗi phần tử = một lần góp), khóa là maNguon.
+    // Các nguồn kinh phí (mỗi phần tử = một bên đóng góp, đã cộng dồn các lần góp), khóa là maNguon.
     // TreeMap: tra theo mã nhanh, đồng thời duyệt luôn theo thứ tự mã nên kết quả in ra ổn định.
     private TreeMap<String, NguonKinhPhi> dsNguonKinhPhi = new TreeMap<>();
 
@@ -36,22 +33,37 @@ public class KhacPhucThienTai {
         }
         this.thienTai = thienTai;
     }
-
-    //QUẢN LÝ NGUỒN KINH PHÍ
-
+    //quản lý nguồn kinh phí
     /*
-     * Thêm một khoản kinh phí. Trả về false nếu khoản null, mã nguồn đã có,
-     * nhóm Nhà nước nhưng không phải NguonNhaNuoc, hoặc bên đó đã có ở nhóm khác.
+     * Thêm một nguồn kinh phí (một bên đóng góp, các lần góp đã được cộng dồn trong nguồn).
+     * Trả về false nếu:
+     *  - nguồn null hoặc dữ liệu không hợp lệ (kiemTraHopLe = false, ví dụ CCCD không đủ 12 số)
+     *  - nguồn chưa có đồng đóng góp nào (tổng tiền = 0): nếu cho vào thì thống kê sẽ lỗi khi chấm mức,
+     *    và kéo sai bên thấp nhất, trung bình
+     *  - nguồn thuộc thiên tai khác (maTT không trùng với thiên tai của khắc phục này)
+     *  - mã nguồn đã có
+     *  - nhóm Nhà nước nhưng không phải NguonNhaNuoc (không có cấp ngân sách)
+     *  - cùng một cá nhân (CCCD) hoặc cùng một công ty (mã số thuế) đã có ở nguồn khác:
+     *    một bên chỉ được có một nguồn, góp thêm thì gọi themDongGop trên nguồn đó
      * Không chặn khi thiên tai đã kết thúc: việc quyên góp thường còn tiếp tục
      * trong lúc khắc phục hậu quả, kể cả sau khi thiên tai chấm dứt.
      */
     public boolean themNguon(NguonKinhPhi nguon) {
 
-        if (nguon == null) {
+        if (nguon == null || !nguon.kiemTraHopLe()) {
             return false;
         }
 
-        // Mã nguồn là mã của MỘT lần góp nên phải duy nhất (khác maBen, một bên có thể góp nhiều lần)
+        if (nguon.getTongSoTien() <= 0) {
+            return false;
+        }
+
+        // Nguồn phải đóng góp cho đúng thiên tai này
+        if (!thienTai.getMaTT().equals(nguon.getMaTT())) {
+            return false;
+        }
+
+        // Mã nguồn phải duy nhất trong thiên tai
         if (dsNguonKinhPhi.containsKey(nguon.getMaNguon())) {
             return false;
         }
@@ -61,15 +73,28 @@ public class KhacPhucThienTai {
             return false;
         }
 
-        // Một bên (maBen) chỉ được thuộc một nhóm, trái nhóm thì từ chối ngay
-        for (NguonKinhPhi n : dsNguonKinhPhi.values()) {
-            if (n.getMaNguon().equals(nguon.getMaNguon()) && n.getNhomNguon() != nguon.getNhomNguon()) {
-                return false;
-            }
+        // Cùng một bên không được xuất hiện ở hai nguồn (nếu không, mức đóng góp bị chia đôi)
+        if (trungDinhDanh(nguon)) {
+            return false;
         }
 
         dsNguonKinhPhi.put(nguon.getMaNguon(), nguon);
         return true;
+    }
+
+    // Kiểm tra bên đóng góp của nguồn này đã có ở một nguồn khác chưa (so CCCD cá nhân, mã số thuế công ty)
+    private boolean trungDinhDanh(NguonKinhPhi nguon) {
+        for (NguonKinhPhi n : dsNguonKinhPhi.values()) {
+            if (nguon instanceof NguonCaNhan && n instanceof NguonCaNhan
+                    && ((NguonCaNhan) nguon).getCCCD().equals(((NguonCaNhan) n).getCCCD())) {
+                return true;
+            }
+            if (nguon instanceof NguonCongTy && n instanceof NguonCongTy
+                    && ((NguonCongTy) nguon).getMaSoThue().equals(((NguonCongTy) n).getMaSoThue())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Xóa một khoản theo mã nguồn (ví dụ nhập nhầm). Trả về false nếu không có.
@@ -92,13 +117,11 @@ public class KhacPhucThienTai {
         return dsNguonKinhPhi.get(maNguon);
     }
 
-    // Số khoản (số lần góp) đang có.
+    // Số nguồn kinh phí (số bên đóng góp) đang có.
     public int demSoNguon() {
         return dsNguonKinhPhi.size();
     }
-
-    //TỔNG HỢP
-
+    //tổng hợp
     // Tổng kinh phí đã huy động được (cộng mọi khoản, mọi nhóm).
     public long tinhTongKinhPhi() {
         long tong = 0;
@@ -135,9 +158,7 @@ public class KhacPhucThienTai {
     public ThongKeDongGop thongKeDongGop() {
         return new ThongKeDongGop(new ArrayList<>(dsNguonKinhPhi.values()));
     }
-
-    //GETTER
-
+    //getter
     public ThienTai getThienTai() {
         return thienTai;
     }

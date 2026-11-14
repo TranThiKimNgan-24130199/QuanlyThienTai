@@ -1,6 +1,5 @@
-
 package main;
-
+//người thực hiện: Nguyễn Thị Hoài Lan
 import java.util.ArrayList;
 import trangthai.QuanHeChuHo;
 

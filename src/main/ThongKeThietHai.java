@@ -1,5 +1,5 @@
 package main;
-
+//người thực hiện: Trần Thị Kim Ngân
 import trangthai.CapDanhGia;
 import trangthai.MucDoThietHai;
 
