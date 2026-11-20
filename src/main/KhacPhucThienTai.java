@@ -5,12 +5,15 @@ import java.util.EnumMap;
 import java.util.TreeMap;
 
 import trangthai.CapNganSach;
+import trangthai.LoaiHoatDong;
+import trangthai.MucDichSuDung;
 import trangthai.NhomNguon;
+import trangthai.TrangThaiKhacPhuc;
 
 /*
  * KhacPhucThienTai: phần "khắc phục" của MỘT thiên tai.
- * Ở giai đoạn 3 lớp này chỉ lo phía THU: giữ các khoản kinh phí đã huy động được.
- * (Phía CHI - dùng tiền vào việc gì - sẽ thêm ở giai đoạn 4.)
+ * Giai đoạn 3: phía THU - giữ các khoản kinh phí đã huy động được (nguồn kinh phí).
+ * Giai đoạn 4: phía CHI - giữ các hoạt động khắc phục và ghi nhận chi từ từng nguồn.
  *
  * QUAN HỆ VỚI ThienTai (cách B, quan hệ 1-1, hai chiều):
  *  - ThienTai giữ đúng một KhacPhucThienTai (thuộc tính khacPhuc, tạo ngay trong constructor ThienTai).
@@ -25,6 +28,9 @@ public class KhacPhucThienTai {
     // Các nguồn kinh phí (mỗi phần tử = một bên đóng góp, đã cộng dồn các lần góp), khóa là maNguon.
     // TreeMap: tra theo mã nhanh, đồng thời duyệt luôn theo thứ tự mã nên kết quả in ra ổn định.
     private TreeMap<String, NguonKinhPhi> dsNguonKinhPhi = new TreeMap<>();
+
+    // Các hoạt động khắc phục (hỗ trợ hộ, sửa chữa / xây mới hạ tầng), khóa là maHoatDong.
+    private TreeMap<String, HoatDongKhacPhuc> dsHoatDong = new TreeMap<>();
 
     // Chỉ ThienTai gọi (truyền this vào).
     KhacPhucThienTai(ThienTai thienTai) {
@@ -79,6 +85,9 @@ public class KhacPhucThienTai {
         }
 
         dsNguonKinhPhi.put(nguon.getMaNguon(), nguon);
+        // Khóa nhãn mục đích: người góp quyết định mục đích lúc góp, sau đó không đổi.
+        // Vì vậy phải đặt mục đích TRƯỚC khi thêm nguồn vào khắc phục.
+        nguon.khoaMucDich();
         return true;
     }
 
@@ -97,10 +106,15 @@ public class KhacPhucThienTai {
         return false;
     }
 
-    // Xóa một khoản theo mã nguồn (ví dụ nhập nhầm). Trả về false nếu không có.
+    // Xóa một khoản theo mã nguồn (ví dụ nhập nhầm). Trả về false nếu không có hoặc nguồn đã có chi.
     public boolean xoaNguon(String maNguon) {
 
         if (maNguon == null || maNguon.trim().isEmpty()) {
+            return false;
+        }
+
+        // Nguồn đã có chi thì không xóa: xóa sẽ làm mất dấu số tiền đã chi từ nguồn đó
+        if (daChiTuNguon(maNguon) > 0) {
             return false;
         }
 
@@ -158,6 +172,180 @@ public class KhacPhucThienTai {
     public ThongKeDongGop thongKeDongGop() {
         return new ThongKeDongGop(new ArrayList<>(dsNguonKinhPhi.values()));
     }
+
+// người thực hiện : Trần Thị Kim Ngân
+    /*
+     * Thêm một hoạt động khắc phục. Trả về false nếu:
+     *  - hoạt động null hoặc không hợp lệ (kiemTraHopLe = false)
+     *  - hoạt động đã có tiền chi (chi phải đi qua ghiNhanChi để được kiểm tra nguồn)
+     *  - trùng mã hoạt động
+     *  - maKV không thuộc thiên tai này
+     *  - HO_TRO_HO_DAN: hộ chưa có bản ghi thiệt hại trong thiên tai này, hoặc hộ không thuộc khu vực maKV
+     *  - hai loại hạ tầng: maCSVC không phải khoản thiệt hại cơ sở vật chất của khu vực đó
+     *    ghi cho thiên tai này
+     */
+    public boolean themHoatDong(HoatDongKhacPhuc hd) {
+
+        if (hd == null || !hd.kiemTraHopLe()) {
+            return false;
+        }
+
+        if (hd.tongChi() > 0) {
+            return false;
+        }
+
+        if (dsHoatDong.containsKey(hd.getMaHoatDong())) {
+            return false;
+        }
+
+        // Khu vực thực hiện phải thuộc thiên tai này
+        KhuVuc kv = thienTai.getDsKhuVuc().get(hd.getMaKV());
+        if (kv == null) {
+            return false;
+        }
+
+        if (hd.getLoai() == LoaiHoatDong.HO_TRO_HO_DAN) {
+            // Hộ phải có bản ghi thiệt hại trong thiên tai này và thuộc đúng khu vực
+            BanGhiThietHaiHoDan bg = timBanGhiCuaHo(hd.getMaHo());
+            if (bg == null || bg.getHoDan().getKhuVuc() == null
+                    || !hd.getMaKV().equals(bg.getHoDan().getKhuVuc().getMaKV())) {
+                return false;
+            }
+        } else {
+            // Hạ tầng: cơ sở vật chất phải là khoản thiệt hại của khu vực, ghi cho thiên tai này
+            ThietHaiCoSoVatChat_NN cs = kv.timCoSoVatChat(hd.getMaCSVC());
+            if (cs == null || !thienTai.getMaTT().equals(cs.getMaTT())) {
+                return false;
+            }
+        }
+
+        dsHoatDong.put(hd.getMaHoatDong(), hd);
+        return true;
+    }
+
+    // Tìm một hoạt động theo mã; không có thì trả null.
+    public HoatDongKhacPhuc timHoatDong(String maHoatDong) {
+
+        if (maHoatDong == null || maHoatDong.trim().isEmpty()) {
+            return null;
+        }
+
+        return dsHoatDong.get(maHoatDong);
+    }
+
+    // Xóa hoạt động theo mã. Trả về false nếu không có hoặc hoạt động đã chi đồng nào.
+    public boolean xoaHoatDong(String maHoatDong) {
+
+        HoatDongKhacPhuc hd = timHoatDong(maHoatDong);
+
+        if (hd == null || hd.tongChi() > 0) {
+            return false;
+        }
+
+        dsHoatDong.remove(maHoatDong);
+        return true;
+    }
+
+    // Số hoạt động khắc phục đang có.
+    public int demSoHoatDong() {
+        return dsHoatDong.size();
+    }
+
+    /*
+     * Ghi nhận chi một khoản từ một nguồn cho một hoạt động. Trả về false (không ghi gì) nếu:
+     *  - hoạt động hoặc nguồn không tồn tại
+     *  - số tiền <= 0
+     *  - hoạt động đã HOAN_THANH
+     *  - nguồn có mục đích cụ thể (khác KHONG_CHI_DINH) mà khác mục đích loại hoạt động yêu cầu
+     *  - số tiền lớn hơn số còn lại của nguồn
+     * Hợp lệ thì cộng vào chi của hoạt động (congChi) và trả về true.
+     */
+    public boolean ghiNhanChi(String maHoatDong, String maNguon, long soTien) {
+
+        HoatDongKhacPhuc hd = timHoatDong(maHoatDong);
+        NguonKinhPhi nguon = timNguon(maNguon);
+
+        if (hd == null || nguon == null) {
+            return false;
+        }
+
+        if (soTien <= 0) {
+            return false;
+        }
+
+        if (hd.getTrangThai() == TrangThaiKhacPhuc.HOAN_THANH) {
+            return false;
+        }
+
+        MucDichSuDung mucDich = nguon.getMucDichSuDung();
+        if (mucDich != MucDichSuDung.KHONG_CHI_DINH && mucDich != hd.getLoai().mucDichYeuCau()) {
+            return false;
+        }
+
+        if (soTien > conLaiCuaNguon(maNguon)) {
+            return false;
+        }
+
+        hd.congChi(maNguon, soTien);
+        return true;
+    }
+
+    // Tổng tiền đã chi từ một nguồn, cộng qua mọi hoạt động (nguồn chưa chi hoặc không có thì là 0).
+    public long daChiTuNguon(String maNguon) {
+
+        if (maNguon == null || maNguon.trim().isEmpty()) {
+            return 0;
+        }
+
+        long tong = 0;
+        for (HoatDongKhacPhuc hd : dsHoatDong.values()) {
+            tong += hd.getChiTheoNguon().getOrDefault(maNguon, 0L);
+        }
+        return tong;
+    }
+
+    // Số tiền còn lại của một nguồn = tổng nguồn đã huy động - đã chi. Ném IllegalArgumentException nếu nguồn không tồn tại.
+    public long conLaiCuaNguon(String maNguon) {
+
+        NguonKinhPhi nguon = timNguon(maNguon);
+
+        if (nguon == null) {
+            throw new IllegalArgumentException("Nguồn kinh phí không tồn tại: " + maNguon);
+        }
+
+        return nguon.getTongSoTien() - daChiTuNguon(maNguon);
+    }
+
+    // Tổng tiền đã chi của mọi hoạt động.
+    public long tongDaChi() {
+
+        long tong = 0;
+        for (HoatDongKhacPhuc hd : dsHoatDong.values()) {
+            tong += hd.tongChi();
+        }
+        return tong;
+    }
+
+    // Kinh phí còn lại = tổng huy động - tổng đã chi (tinhTongKinhPhi vẫn là tổng huy động).
+    public long tinhKinhPhiConLai() {
+        return tinhTongKinhPhi() - tongDaChi();
+    }
+
+    // Tìm bản ghi thiệt hại của một hộ trong thiên tai này; không có thì trả null.
+    private BanGhiThietHaiHoDan timBanGhiCuaHo(String maHo) {
+
+        if (maHo == null) {
+            return null;
+        }
+
+        for (BanGhiThietHaiHoDan bg : thienTai.getDsBanGhi().values()) {
+            if (maHo.equals(bg.getHoDan().getMaHo())) {
+                return bg;
+            }
+        }
+        return null;
+    }
+
     //getter
     public ThienTai getThienTai() {
         return thienTai;
@@ -167,5 +355,10 @@ public class KhacPhucThienTai {
     // (muốn thêm/xóa thì dùng themNguon / xoaNguon để còn kiểm tra hợp lệ).
     public TreeMap<String, NguonKinhPhi> getDsNguonKinhPhi() {
         return new TreeMap<>(dsNguonKinhPhi);
+    }
+
+    // Bản sao danh sách hoạt động (muốn thêm/xóa thì dùng themHoatDong / xoaHoatDong).
+    public TreeMap<String, HoatDongKhacPhuc> getDsHoatDong() {
+        return new TreeMap<>(dsHoatDong);
     }
 }
