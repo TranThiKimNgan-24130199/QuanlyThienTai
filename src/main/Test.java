@@ -11,14 +11,16 @@ import java.util.TreeMap;
 import trangthai.*;
 
 /*
- * Lớp test duy nhất: dựng dữ liệu mẫu cho Bão số 5 (TT01) rồi in HAI báo cáo chi tiết,
- * không in kết quả kiểm thử từng chức năng.
+ * Lớp test duy nhất: dựng dữ liệu mẫu cho Bão số 5 (TT01) rồi in 3 báo cáo chi tiết,
+ *
  *
  * 1. Báo cáo thiệt hại: thông tin thiên tai, tổng hợp, chi tiết từng khu vực
  *    (cơ sở vật chất nhà nước, từng hộ dân, từng thành viên), danh sách theo mức độ.
  * 2. Báo cáo kinh phí đóng góp khắc phục: chi tiết từng nguồn, tổng hợp theo nhóm,
  *    kinh phí Nhà nước theo cấp ngân sách, bên cao nhất / thấp nhất / trung bình,
  *    mức đóng góp, so sánh với thiệt hại.
+ * 3. Báo cáo hỗ trợ và chi khắc phục: các hoạt động khắc phục, chi từ nguồn nào, chi theo loại /
+ *    khu vực / địa phương, nhu cầu - đã hỗ trợ - mức đáp ứng của hộ dân, khu vực, địa phương.
  */
 public class Test {
 
@@ -34,6 +36,7 @@ public class Test {
         dungDuLieu();
         inBaoCao(baoSo5);
         inBaoCaoKinhPhi(baoSo5);
+        inBaoCaoHoTro(baoSo5);
     }   
     //dữ liệu mẫu
     private static void dungDuLieu() {
@@ -728,6 +731,280 @@ public class Test {
             case CAO:        return "Cao";
             case RAT_CAO:    return "Rất cao";
             default:         return m.name();
+        }
+    }
+
+    // ===================== 7. Báo cáo hỗ trợ và chi khắc phục =====================
+
+    // Bổ sung hai nguồn có mục đích sử dụng chỉ định, các hoạt động khắc phục và các khoản chi mẫu.
+    // Mọi khoản chi đều đi qua ghiNhanChi (đã kiểm tra nguồn đủ tiền, đúng mục đích).
+    private static void dungDuLieuHoTro(ThienTai tt) {
+
+        KhacPhucThienTai kp = tt.getKhacPhuc();
+        String ma = tt.getMaTT();
+
+        // Nguồn có mục đích chỉ định: phải đặt mục đích TRƯỚC khi thêm vào khắc phục
+        // (thêm xong thì nhãn bị khóa, không đổi được nữa)
+        NguonCaNhan hanh = new NguonCaNhan("KP13", "Nguyễn Thị Hạnh (chỉ giúp hộ dân)", ma, "079300000005");
+        batBuoc(hanh.themDongGop(60_000_000L), "KP13 đợt 1");
+        hanh.capNhatMucDichSuDung(MucDichSuDung.HO_TRO_NGUOI_DAN);
+        NguonCongTy cauDuong = new NguonCongTy("KP14", "Công ty CP Cầu đường Miền Trung (chỉ cho hạ tầng)", ma, "0400222333");
+        batBuoc(cauDuong.themDongGop(500_000_000L), "KP14 đợt 1");
+        cauDuong.capNhatMucDichSuDung(MucDichSuDung.CO_SO_HA_TANG);
+        batBuoc(kp.themNguon(hanh), "thêm nguồn KP13");
+        batBuoc(kp.themNguon(cauDuong), "thêm nguồn KP14");
+
+        // Hỗ trợ hộ dân (nhu cầu: HD01 30tr, HD03 25tr, HD04 60tr, HD05 100tr)
+        hoatDongHoDan(kp, "HT01", "Hỗ trợ hộ HD05 (có người chết, mất tích, nhà sập)", "KV01", "HD05", 100_000_000L);
+        hoatDongHoDan(kp, "HT02", "Hỗ trợ hộ HD04 (hai người bị thương, hai nhà hư hỏng)", "KV01", "HD04", 60_000_000L);
+        hoatDongHoDan(kp, "HT03", "Hỗ trợ hộ HD01 (một người bị thương, nhà hư hỏng)", "KV01", "HD01", 30_000_000L);
+        hoatDongHoDan(kp, "HT04", "Hỗ trợ bổ sung hộ HD04", "KV01", "HD04", 20_000_000L);
+        hoatDongHoDan(kp, "HT05", "Hỗ trợ hộ HD03 (nhà hư hỏng)", "KV01", "HD03", 25_000_000L);
+
+        // Hạ tầng: sửa chữa công trình công, XÂY ĐƯỜNG MỚI thay cầu đường bị sập, sửa cầu ở KV02
+        hoatDongHaTang(kp, "HT06", "Sửa chữa công trình công bị hư hỏng", LoaiHoatDong.SUA_CHUA_HA_TANG,
+                "KV01", "CSVC02", 150_000_000L);
+        hoatDongHaTang(kp, "HT07", "Xây đoạn đường mới thay đoạn cầu đường bị sập", LoaiHoatDong.XAY_MOI_HA_TANG,
+                "KV01", "CSVC01", 800_000_000L);
+        hoatDongHaTang(kp, "HT08", "Sửa chữa cầu đường bị hư hỏng ở Cẩm Châu", LoaiHoatDong.SUA_CHUA_HA_TANG,
+                "KV02", "CSVC03", 40_000_000L);
+
+        // Chi tiền: hộ dân (nguồn Nhà nước, nguồn đóng góp chỉ giúp dân)
+        chi(kp, "HT01", "KP01", 40_000_000L);
+        chi(kp, "HT01", "KP13", 60_000_000L);       // HT01 chi từ hai nguồn
+        chi(kp, "HT02", "KP02", 20_000_000L);
+        chi(kp, "HT03", "KP01", 30_000_000L);
+        chi(kp, "HT04", "KP01", 15_000_000L);       // hộ HD04 có hai hoạt động: cộng dồn 35 triệu
+        // HT05 chưa chi đồng nào (mới lập kế hoạch)
+
+        // Chi tiền: hạ tầng (nguồn đóng góp chỉ cho hạ tầng, nguồn Nhà nước)
+        chi(kp, "HT06", "KP14", 160_000_000L);      // chi vượt dự kiến 10 triệu
+        chi(kp, "HT07", "KP14", 340_000_000L);
+        chi(kp, "HT08", "KP01", 52_000_000L);       // chi vượt dự kiến 12 triệu
+
+        // Tiến độ (HT05 giữ CHUA_BAT_DAU)
+        kp.timHoatDong("HT01").capNhatTrangThai(TrangThaiKhacPhuc.HOAN_THANH);
+        kp.timHoatDong("HT02").capNhatTrangThai(TrangThaiKhacPhuc.DANG_THUC_HIEN);
+        kp.timHoatDong("HT03").capNhatTrangThai(TrangThaiKhacPhuc.HOAN_THANH);
+        kp.timHoatDong("HT04").capNhatTrangThai(TrangThaiKhacPhuc.DANG_THUC_HIEN);
+        kp.timHoatDong("HT06").capNhatTrangThai(TrangThaiKhacPhuc.HOAN_THANH);
+        kp.timHoatDong("HT07").capNhatTrangThai(TrangThaiKhacPhuc.DANG_THUC_HIEN);
+        kp.timHoatDong("HT08").capNhatTrangThai(TrangThaiKhacPhuc.HOAN_THANH);
+    }
+
+    private static void hoatDongHoDan(KhacPhucThienTai kp, String ma, String ten, String maKV, String maHo, long duKien) {
+        batBuoc(kp.themHoatDong(new HoatDongKhacPhuc(ma, ten, LoaiHoatDong.HO_TRO_HO_DAN, maKV, maHo, null, duKien)),
+                "thêm hoạt động " + ma);
+    }
+
+    private static void hoatDongHaTang(KhacPhucThienTai kp, String ma, String ten, LoaiHoatDong loai, String maKV,
+            String maCSVC, long duKien) {
+        batBuoc(kp.themHoatDong(new HoatDongKhacPhuc(ma, ten, loai, maKV, null, maCSVC, duKien)), "thêm hoạt động " + ma);
+    }
+
+    private static void chi(KhacPhucThienTai kp, String maHoatDong, String maNguon, long soTien) {
+        batBuoc(kp.ghiNhanChi(maHoatDong, maNguon, soTien), "chi " + maHoatDong + " từ " + maNguon);
+    }
+
+    // Báo cáo hỗ trợ và chi: hoạt động, chi từ nguồn nào, thống kê chi, đánh giá mức đáp ứng
+    private static void inBaoCaoHoTro(ThienTai tt) {
+
+        dungDuLieuHoTro(tt);
+
+        KhacPhucThienTai kp = tt.getKhacPhuc();
+        ThongKeChi tk = new ThongKeChi(kp);
+        DanhGiaHoTro dg = new DanhGiaHoTro(tt);
+        TreeMap<String, KhuVuc> dsKV = new TreeMap<>(tt.getDsKhuVuc());
+        TreeMap<String, NguonKinhPhi> dsNguon = kp.getDsNguonKinhPhi();
+        TreeMap<String, HoatDongKhacPhuc> dsHoatDong = kp.getDsHoatDong();
+
+        dong("");
+        dong("");
+        dong("                    BÁO CÁO HỖ TRỢ VÀ CHI KHẮC PHỤC THIÊN TAI");
+
+        // 7. Tổng quan
+        dong("");
+        dong("7. TỔNG QUAN HUY ĐỘNG VÀ CHI");
+        dong("Thiên tai                 : " + tt.getMaTT() + " - " + tt.getTen());
+        dong("Số nguồn kinh phí         : " + kp.demSoNguon() + " (đã bổ sung KP13, KP14 là hai nguồn chỉ định mục đích)");
+        dong("Số hoạt động khắc phục    : " + kp.demSoHoatDong());
+        dong("Tổng kinh phí huy động    : " + tien(tk.tongHuyDong()));
+        dong("Tổng đã chi               : " + tien(tk.tongChi()));
+        dong("Còn lại                   : " + tien(tk.conLai()));
+        dong("Tỷ lệ đã chi              : " + String.format(Locale.US, "%.2f", tk.tyLeDaChi()) + "%");
+
+        // 7.1 Các hoạt động
+        dong("");
+        dong("7.1. CÁC HOẠT ĐỘNG KHẮC PHỤC");
+        int stt = 0;
+        for (HoatDongKhacPhuc h : dsHoatDong.values()) {
+            stt++;
+            inHoatDong(tt, h, stt);
+        }
+
+        // 7.2 Chi từ nguồn nào
+        dong("");
+        dong("7.2. KINH PHÍ CHI TỪ NGUỒN NÀO");
+        dong(String.format("   %-7s %-10s %-18s %16s %16s %16s", "Mã", "Nhóm", "Mục đích sử dụng", "Huy động", "Đã chi", "Còn lại"));
+        for (NguonKinhPhi n : dsNguon.values()) {
+            dong(String.format("   %-7s %-10s %-18s %16s %16s %16s", n.getMaNguon(), tenNhomNguon(n.getNhomNguon()),
+                    tenMucDichSuDung(n.getMucDichSuDung()), so(n.getTongSoTien()),
+                    so(tk.chiTheoNguon().get(n.getMaNguon())), so(tk.conLaiTheoNguon().get(n.getMaNguon()))));
+        }
+
+        dong("");
+        dong("   Chi theo nhóm nguồn:");
+        for (Map.Entry<NhomNguon, Long> e : tk.chiTheoNhomNguon().entrySet()) {
+            double tyLe = tk.tongChi() == 0 ? 0.0 : e.getValue() * 100.0 / tk.tongChi();
+            dong(String.format("   %-12s %18s %9.2f%% tổng chi", tenNhomNguon(e.getKey()), so(e.getValue()), tyLe));
+        }
+
+        // 7.3 Chi theo đối tượng
+        dong("");
+        dong("7.3. CHI THEO LOẠI HOẠT ĐỘNG, KHU VỰC, ĐỊA PHƯƠNG");
+        dong("   Theo loại hoạt động:");
+        for (Map.Entry<LoaiHoatDong, Long> e : tk.chiTheoLoai().entrySet()) {
+            dong(String.format("   %-18s %18s", tenLoaiHoatDong(e.getKey()), so(e.getValue())));
+        }
+        dong("   Theo khu vực:");
+        for (Map.Entry<String, Long> e : tk.chiTheoKhuVuc().entrySet()) {
+            dong(String.format("   %-6s %-14s %18s", e.getKey(), dsKV.get(e.getKey()).getXaPhuong(), so(e.getValue())));
+        }
+        dong("   Theo địa phương (tỉnh/thành):");
+        for (Map.Entry<String, Long> e : tk.chiTheoDiaPhuong().entrySet()) {
+            dong(String.format("   %-21s %18s", e.getKey(), so(e.getValue())));
+        }
+
+        // 7.4 Tiến độ
+        dong("");
+        dong("7.4. TIẾN ĐỘ HOẠT ĐỘNG");
+        for (Map.Entry<TrangThaiKhacPhuc, Integer> e : tk.demHoatDongTheoTrangThai().entrySet()) {
+            dong("   " + tenTrangThaiKhacPhuc(e.getKey()) + ": " + e.getValue() + " hoạt động");
+        }
+        List<String> vuot = tk.danhSachHoatDongVuotDuKien();
+        dong("   Hoạt động chi vượt kinh phí dự kiến (" + vuot.size() + "):");
+        for (String maHD : vuot) {
+            HoatDongKhacPhuc h = dsHoatDong.get(maHD);
+            dong("      - " + maHD + ": dự kiến " + tien(h.getKinhPhiDuKien()) + ", đã chi " + tien(h.tongChi())
+                    + ", vượt " + tien(h.tongChi() - h.getKinhPhiDuKien()));
+        }
+
+        // 7.5 Đánh giá mức hỗ trợ hộ dân
+        dong("");
+        dong("7.5. ĐÁNH GIÁ MỨC HỖ TRỢ HỘ DÂN");
+        dong(String.format("   %-6s %-22s %-14s %14s %14s  %s", "Mã hộ", "Chủ hộ", "Mức thiệt hại", "Nhu cầu", "Đã hỗ trợ",
+                "Mức đáp ứng"));
+        for (BanGhiThietHaiHoDan bg : tt.getDsBanGhi().values()) {
+            String maHo = bg.getHoDan().getMaHo();
+            dong(String.format("   %-6s %-22s %-14s %14s %14s  %s", maHo, bg.getHoDan().getChuHo().getHoTen(),
+                    tenMucDo(bg.danhGiaMucDo()), so(dg.nhuCauHo(maHo)), so(dg.daHoTroHo(maHo)),
+                    tenMucDapUng(dg.mucDapUngHo(maHo))));
+        }
+
+        // 7.6 Khu vực
+        dong("");
+        dong("7.6. ĐÁNH GIÁ MỨC HỖ TRỢ KHU VỰC (nhu cầu gồm các hộ và hạ tầng)");
+        dong(String.format("   %-6s %-14s %-14s %16s %16s  %s", "Mã KV", "Xã/Phường", "Mức thiệt hại", "Nhu cầu",
+                "Đã hỗ trợ", "Mức đáp ứng"));
+        for (KhuVuc kv : dsKV.values()) {
+            String maKV = kv.getMaKV();
+            dong(String.format("   %-6s %-14s %-14s %16s %16s  %s", maKV, kv.getXaPhuong(), tenMucDo(tt.danhGiaKhuVuc(maKV)),
+                    so(dg.nhuCauKhuVuc(maKV)), so(dg.daHoTroKhuVuc(maKV)), tenMucDapUng(dg.mucDapUngKhuVuc(maKV))));
+        }
+
+        // 7.7 Địa phương
+        dong("");
+        dong("7.7. ĐÁNH GIÁ MỨC HỖ TRỢ ĐỊA PHƯƠNG (tỉnh/thành phố)");
+        dong(String.format("   %-14s %16s %16s  %s", "Địa phương", "Nhu cầu", "Đã hỗ trợ", "Mức đáp ứng"));
+        for (String tinh : dg.danhSachDiaPhuong()) {
+            dong(String.format("   %-14s %16s %16s  %s", tinh, so(dg.nhuCauDiaPhuong(tinh)), so(dg.daHoTroDiaPhuong(tinh)),
+                    tenMucDapUng(dg.mucDapUngDiaPhuong(tinh))));
+        }
+
+        // 7.8 Danh sách theo mức đáp ứng
+        dong("");
+        dong("7.8. DANH SÁCH THEO MỨC ĐÁP ỨNG");
+        for (MucDapUng m : MucDapUng.values()) {
+            List<HoDan> dsHo = dg.danhSachHoTheoMucDapUng(m);
+            dong("   Mức \"" + tenMucDapUng(m) + "\"");
+            dong("      Hộ dân (" + dsHo.size() + "):");
+            for (HoDan ho : dsHo) {
+                long thieu = Math.max(0, dg.nhuCauHo(ho.getMaHo()) - dg.daHoTroHo(ho.getMaHo()));
+                dong("         - " + ho.getMaHo() + " | chủ hộ " + ho.getChuHo().getHoTen() + " | còn thiếu " + tien(thieu));
+            }
+            List<String> dsKVm = new ArrayList<>();
+            for (KhuVuc kv : dg.danhSachKhuVucTheoMucDapUng(m)) {
+                dsKVm.add(kv.getMaKV() + " (" + kv.getXaPhuong() + ")");
+            }
+            dong("      Khu vực (" + dsKVm.size() + "): " + (dsKVm.isEmpty() ? "không có" : String.join(", ", dsKVm)));
+            List<String> dsDP = dg.danhSachDiaPhuongTheoMucDapUng(m);
+            dong("      Địa phương (" + dsDP.size() + "): " + (dsDP.isEmpty() ? "không có" : String.join(", ", dsDP)));
+        }
+    }
+
+    // In một hoạt động khắc phục: thông tin chung, đối tượng, tiến độ, chi từ nguồn nào
+    private static void inHoatDong(ThienTai tt, HoatDongKhacPhuc h, int stt) {
+
+        KhuVuc kv = tt.getDsKhuVuc().get(h.getMaKV());
+        String doiTuong;
+        if (h.getLoai() == LoaiHoatDong.HO_TRO_HO_DAN) {
+            HoDan ho = kv.getDsHoDan().get(h.getMaHo());
+            doiTuong = "Hộ " + h.getMaHo() + " (chủ hộ " + ho.getChuHo().getHoTen() + ")";
+        } else {
+            doiTuong = "Cơ sở vật chất " + h.getMaCSVC() + " (" + tenLoaiCSVC(kv.timCoSoVatChat(h.getMaCSVC()).getLoaiCSVC()) + ")";
+        }
+
+        dong("");
+        dong("   [" + stt + "] Mã hoạt động    : " + h.getMaHoatDong());
+        dong("       Tên hoạt động    : " + h.getTen());
+        dong("       Loại             : " + tenLoaiHoatDong(h.getLoai()));
+        dong("       Khu vực          : " + kv.getMaKV() + " (" + kv.getXaPhuong() + ", " + kv.getTinhThanhPho() + ")");
+        dong("       Đối tượng        : " + doiTuong);
+        dong("       Trạng thái       : " + tenTrangThaiKhacPhuc(h.getTrangThai()));
+        dong("       Kinh phí dự kiến : " + tien(h.getKinhPhiDuKien()));
+        dong("       Đã chi           : " + tien(h.tongChi())
+                + (h.tongChi() > h.getKinhPhiDuKien() ? " (vượt dự kiến " + tien(h.tongChi() - h.getKinhPhiDuKien()) + ")" : ""));
+        if (h.getChiTheoNguon().isEmpty()) {
+            dong("       Chi từ nguồn     : chưa chi");
+        }
+        for (Map.Entry<String, Long> e : h.getChiTheoNguon().entrySet()) {
+            dong("       Chi từ nguồn     : " + e.getKey() + " - " + tien(e.getValue()));
+        }
+    }
+
+    private static String tenLoaiHoatDong(LoaiHoatDong l) {
+        switch (l) {
+            case HO_TRO_HO_DAN:    return "Hỗ trợ hộ dân";
+            case SUA_CHUA_HA_TANG: return "Sửa chữa hạ tầng";
+            case XAY_MOI_HA_TANG:  return "Xây mới hạ tầng";
+            default:               return l.name();
+        }
+    }
+
+    private static String tenTrangThaiKhacPhuc(TrangThaiKhacPhuc t) {
+        switch (t) {
+            case CHUA_BAT_DAU:   return "Chưa bắt đầu";
+            case DANG_THUC_HIEN: return "Đang thực hiện";
+            case HOAN_THANH:     return "Hoàn thành";
+            default:             return t.name();
+        }
+    }
+
+    private static String tenMucDichSuDung(MucDichSuDung m) {
+        switch (m) {
+            case KHONG_CHI_DINH:   return "Không chỉ định";
+            case HO_TRO_NGUOI_DAN: return "Chỉ hộ dân";
+            case CO_SO_HA_TANG:    return "Chỉ hạ tầng";
+            default:               return m.name();
+        }
+    }
+
+    private static String tenMucDapUng(MucDapUng m) {
+        switch (m) {
+            case CHUA_HO_TRO: return "Chưa hỗ trợ";
+            case MOT_PHAN:    return "Hỗ trợ một phần";
+            case DAY_DU:      return "Đáp ứng đủ";
+            default:          return m.name();
         }
     }
 }

@@ -1,4 +1,5 @@
 package main;
+import trangthai.MucDichSuDung;
 //Người thực hiện : Trần Thị Kim Ngân
 import trangthai.NhomNguon;
 
@@ -12,7 +13,15 @@ public abstract class NguonKinhPhi {
     protected String maTT;          // mã thiên tai mà nguồn này đóng góp cho
     protected long tongSoTien;      // tổng số tiền đã đóng góp (VNĐ), dùng long thay vì double để tránh sai số
     protected int soLanDongGop;     // số lần đóng góp
-
+    
+    
+    //người thực hiện: Nguyễn Thị Hoài Lan
+ // Nguồn này được phép chi vào việc gì. Mặc định KHONG_CHI_DINH (chi việc nào cũng được),
+    // nên các constructor của lớp này và bốn lớp con không phải đổi.
+    private MucDichSuDung mucDichSuDung = MucDichSuDung.KHONG_CHI_DINH;
+    // Đã khóa nhãn mục đích chưa. KhacPhucThienTai khóa ngay khi nhận nguồn vào (themNguon),
+    // vì thực tế người góp quyết định mục đích lúc góp, sau đó không đổi.
+    private boolean daKhoaMucDich = false;
     /*
      * Tạo nguồn kinh phí mới, chưa có đóng góp nào (tongSoTien = 0, soLanDongGop = 0).
      * Ném IllegalArgumentException nếu mã nguồn, tên nguồn hoặc mã thiên tai rỗng.
@@ -76,5 +85,36 @@ public abstract class NguonKinhPhi {
 
     public int getSoLanDongGop() {
         return soLanDongGop;
+    }
+    //người thực hiện đoạn này: Nguyễn Thị Hoài Lan
+    public MucDichSuDung getMucDichSuDung() {
+        return mucDichSuDung;
+    }
+
+    public boolean isDaKhoaMucDich() {
+        return daKhoaMucDich;
+    }
+
+    /*
+     * Đặt mục đích sử dụng của nguồn.
+     * Ném IllegalArgumentException nếu mục đích null, hoặc nếu nhãn đã bị khóa
+     * (nguồn đã được thêm vào KhacPhucThienTai) - phải đặt nhãn TRƯỚC khi thêm nguồn.
+     */
+    public void capNhatMucDichSuDung(MucDichSuDung mucDich) {
+        if (mucDich == null) {
+            throw new IllegalArgumentException("Muc dich su dung khong duoc null");
+        }
+        if (daKhoaMucDich) {
+            throw new IllegalArgumentException("Nguon " + maNguon + " da khoa muc dich su dung");
+        }
+        this.mucDichSuDung = mucDich;
+    }
+
+    /*
+     * Khóa nhãn mục đích. Không có public: chỉ KhacPhucThienTai (cùng package main) gọi,
+     * để bên ngoài không tự mở khóa hay khóa sai chỗ.
+     */
+    void khoaMucDich() {
+        daKhoaMucDich = true;
     }
 }

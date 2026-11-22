@@ -28,7 +28,7 @@ public class DanhGiaHoTro {
         this.thienTai = thienTai;
     }
 
-    // ================= Hộ dân =================
+    // Hộ dân 
 
     /*
      * Nhu cầu hỗ trợ của hộ = tổng các khoản theo thiệt hại ghi trong bản ghi của hộ
@@ -57,7 +57,7 @@ public class DanhGiaHoTro {
         return MucDapUng.danhGia(nhuCauHo(maHo), daHoTroHo(maHo));
     }
 
-    // ================= Khu vực =================
+    // Khu vực 
 
     /*
      * Nhu cầu của khu vực = tổng nhu cầu các hộ có bản ghi trong khu vực
@@ -99,7 +99,7 @@ public class DanhGiaHoTro {
         return MucDapUng.danhGia(nhuCauKhuVuc(maKV), daHoTroKhuVuc(maKV));
     }
 
-    // ================= Địa phương (tỉnh / thành phố) =================
+    //  Địa phương (tỉnh / thành phố) 
 
     // Các tinhThanhPho có khu vực trong thiên tai, xếp theo tên.
     public List<String> danhSachDiaPhuong() {
@@ -140,7 +140,7 @@ public class DanhGiaHoTro {
         return MucDapUng.danhGia(nhuCauDiaPhuong(tinh), daHoTroDiaPhuong(tinh));
     }
 
-    // ================= Lọc theo mức đáp ứng =================
+    // Lọc theo mức đáp ứng 
 
     // Các hộ có bản ghi trong thiên tai ở mức đáp ứng đã chọn, xếp theo mã hộ.
     public List<HoDan> danhSachHoTheoMucDapUng(MucDapUng mucDapUng) {
@@ -186,7 +186,7 @@ public class DanhGiaHoTro {
         return kq;
     }
 
-    // ================= hàm hỗ trợ nội bộ =================
+    // hàm hỗ trợ nội bộ
 
     // Tìm bản ghi thiệt hại của hộ; không có thì ném IllegalArgumentException.
     private BanGhiThietHaiHoDan timBanGhi(String maHo) {

@@ -1,5 +1,5 @@
 package trangthai;
-/*
+/* người thực hiện: Nguyễn Thị Hoài Lan
  * MucDoDongGop: mức độ đóng góp của MỘT bên (cá nhân / tập thể / công ty)
  * dựa trên TỔNG số tiền bên đó đã góp cho thiên tai.
  *

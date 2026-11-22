@@ -1,5 +1,5 @@
 package trangthai;
-
+//người thực hiện: Trần Thị Kim Ngân
 // Mục đích sử dụng của một nguồn kinh phí: người đóng góp chỉ định lúc góp, sau đó không đổi
 public enum MucDichSuDung {
     KHONG_CHI_DINH,     // mặc định: chi cho việc nào cũng được
